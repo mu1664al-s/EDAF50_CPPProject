@@ -2,6 +2,7 @@
 #ifndef MESSAGES_HANDLER_H
 #define MESSAGES_HANDLER_H
 
+#include "dbinterface.h"
 #include <string>
 
 struct Message
@@ -26,6 +27,7 @@ class MessageHandler
 public:
     ~MessageHandler();
     MessageHandler() = default;
+    MessageHandler(const DBInterface &db) : db(db) {}
 
     // parse and handle messages. throws exception
     // Server requests are rejected if there are no db provided
@@ -34,8 +36,10 @@ public:
     const char *package(const Message &message) const;
 
 private:
+    const DBInterface &db;
     Message decode(const char *package) const;
     const char *encode(const Message &message) const;
+    Message exec(const Message &message) const;
 };
 
 #endif
