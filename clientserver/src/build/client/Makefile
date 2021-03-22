@@ -24,12 +24,14 @@ LDFLAGS   = -g -L ../../libclientserver
 LDLIBS = -lclientserver
 
 # Targets
-PROGS = client
+PROGS = deps client
 
 all: $(PROGS)
 
 # Targets rely on implicit rules for compiling and linking
 # The dependency on libclientserver.a is not defined.
+deps:
+	make -C ../../libclientserver
 client: client.o
 
 SRC = $(wildcard *.cc)

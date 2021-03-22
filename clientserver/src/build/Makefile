@@ -1,4 +1,5 @@
 all:
+	make -C ../libclientserver
 	make -C client
 	make -C server
 
@@ -15,6 +16,5 @@ distclean:
 	make -C server distclean
 
 install:
-	make all
 	make -C server install
 	make -C client install
