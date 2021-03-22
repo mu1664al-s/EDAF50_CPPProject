@@ -1,0 +1,10 @@
+*
+!/**/
+!Makefile
+!*.h*
+!*.cc*
+!*.jar*
+!.gitignore
+!.keep
+!./clientserver/bin
+.vscode/
