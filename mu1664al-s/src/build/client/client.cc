@@ -62,6 +62,7 @@ void handleCommand(const MessageHandler &msh, int command)
     default:
         break;
     }
+    msh.handle();
 }
 
 int app(const MessageHandler &msh)
