@@ -4,18 +4,18 @@
 using std::cout;
 using std::endl;
 
-void MessageHandler::handle(const char *package) const
+void MessageHandler::handle() const
 {
-    Message ms = decode(package); // decode
+    Message ms = decode(readPackage()); // decode
     if (ms.status == Protocol::ANS_ACK)
     {
-        // handle response package
+        // handle response package, can be an error
         // print result
         return;
     }
     if (ms.status == Protocol::ANS_NAK)
     {
-        // handle response package
+        // handle response package, can be an error
         // print result
         return;
     }
@@ -26,11 +26,29 @@ void MessageHandler::send(const Message &message) const
     writeString(encode(message));
 }
 
-Message MessageHandler::decode(const char *package) const
+Message MessageHandler::decode(string package) const
 {
+    // generate a message from byte data
 }
 
 string MessageHandler::encode(const Message &message) const
+{
+}
+
+string MessageHandler::readPackage() const
+{
+    // read bytes until end byte is reached
+}
+
+void MessageHandler::sendRequest(Protocol command, const std::vector<Parameter> &parameters) const
+{
+}
+
+Parameter MessageHandler::numParam(unsigned int num) const
+{
+}
+
+Parameter MessageHandler::strParam(string str) const
 {
 }
 
