@@ -9,12 +9,13 @@
 enum class DBExceptionType
 {
 	GROUP_NOT_FOUND = 0,
-	ARTICLE_NOT_FOUND = 1,
+	GROUP_ALREADY_EXITS = 1,
+	ARTICLE_NOT_FOUND = 2
 };
 
 struct DBException
 {
-	int type;
+	DBExceptionType type;
 	string message;
 };
 
