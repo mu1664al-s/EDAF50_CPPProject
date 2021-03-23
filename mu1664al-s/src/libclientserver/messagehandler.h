@@ -15,7 +15,7 @@ using std::shared_ptr;
 struct Param
 {
     Protocol type;
-    unsigned int N;
+    int N;
     string str;
 };
 
@@ -42,7 +42,7 @@ public:
     // Response message is generated and returned
     void handle() const;
     void sendRequest(Protocol command, const Parameters &parameters) const;
-    Parameter numParam(unsigned int num) const;
+    Parameter numParam(int num) const;
     Parameter strParam(string str) const;
 
 private:
@@ -52,8 +52,8 @@ private:
     string encode(const Message &message) const;
     void exec(const Message &message) const;
     string readPackage() const;
-    unsigned int decodeNumber(const string &str) const;
-    string encodeNumber(unsigned int num) const;
+    int decodeNumber(const string &str) const;
+    string encodeNumber(int num) const;
     void writeString(const string &s) const;
     void send(const Message &message) const;
 };
