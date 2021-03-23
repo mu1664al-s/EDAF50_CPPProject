@@ -17,8 +17,9 @@ int main(int argc, char *argv[])
             try
             {
                 shared_ptr<DBInterface> db = make_shared<DBInMemory>(DBInMemory());
-                MessageHandler msh = MessageHandler(db, conn);
-                msh.handle();
+                MessageHandler msh = MessageHandler(conn);
+                Message ms = msh.recieve();
+                base_server.exec(msh, db, ms);
             }
             catch (ConnectionClosedException &)
             {

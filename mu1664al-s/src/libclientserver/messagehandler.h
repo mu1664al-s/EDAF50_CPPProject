@@ -2,7 +2,6 @@
 #ifndef MESSAGES_HANDLER_H
 #define MESSAGES_HANDLER_H
 
-#include "dbinterface.h"
 #include "protocol.h"
 #include "connection.h"
 #include <memory>
@@ -12,6 +11,7 @@
 
 using std::make_pair;
 using std::shared_ptr;
+using std::string;
 
 struct Param
 {
@@ -36,19 +36,18 @@ class MessageHandler
 {
 public:
     ~MessageHandler(){};
-    MessageHandler(const shared_ptr<Connection> &conn) : db(nullptr), conn(conn) {}
-    MessageHandler(const shared_ptr<DBInterface> &db, const SharedConnection &conn) : db(db), conn(conn) {}
+    MessageHandler(const SharedConnection &conn) : conn(conn) {}
 
     // parse and handle messages. throws exception
     // Server requests are rejected iConnectionf there are no db provided
     // Response message is generated and returned
-    void handle() const;
+    Message recieve() const;
     void sendRequest(Protocol command, const Parameters &parameters) const;
     Parameter numParam(int num) const;
     Parameter strParam(string str) const;
+    void send(const Message &message) const;
 
 private:
-    const shared_ptr<DBInterface> &db;
     const SharedConnection &conn;
     Message decode(string package) const;
     string encode(const Message &message) const;
@@ -57,7 +56,6 @@ private:
     int decodeNumber(const string &str) const;
     string encodeNumber(int num) const;
     void writeString(const string &s) const;
-    void send(const Message &message) const;
 };
 
 #endif

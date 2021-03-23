@@ -4,7 +4,7 @@ A simple single threaded news server that communicates with the client using a s
 
 ## About
 
-The server can handle multiple connections. There are two types of servers. Executable "serverinmemory" is an in memory server while "serverdisk" on the other hand uses a filesystem. The interactions with the two different types of databases are defined in the "dbinterface.h" interface. The databases themselves are implemented in "dbdisk.cc" and "dbinmemory.cc". The message handler is denined in "messagehandler.h". This class takes a connection and database (throw dbinterface). The database is left out when used by client. This class handles all communication with a very high abstraction level. It can "handle" incomming packages and "sendRequest" send requests to the server.
+The server can handle multiple connections. There are two types of servers. Executable "serverinmemory" is an in memory server while "serverdisk" on the other hand uses a filesystem. The interactions with the two different types of databases are defined in the "dbinterface.h" interface. The databases themselves are implemented in "dbdisk.cc" and "dbinmemory.cc". The message handler is denined in "messagehandler.h". This class takes in a connection and handles all communication with a very high abstraction level. It can "recieve" incomming packages and "sendRequest" send requests to the server.
 
 ## Installation
 

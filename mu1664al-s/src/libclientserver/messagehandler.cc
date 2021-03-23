@@ -1,25 +1,13 @@
 #include "messagehandler.h"
-#include <iostream>
 
-using std::cout;
-using std::endl;
-
-void MessageHandler::handle() const
+Message MessageHandler::recieve() const
 {
     Message ms = decode(readPackage()); // decode
-    if (ms.status == Protocol::ANS_ACK)
+    if (ms.status == Protocol::ANS_ACK || ms.status == Protocol::ANS_NAK)
     {
-        // handle response package, can be an error
-        // print result
-        return;
+        return ms;
     }
-    if (ms.status == Protocol::ANS_NAK)
-    {
-        // handle response package, can be an error
-        // print result
-        return;
-    }
-    exec(ms);
+    return Message{};
 }
 void MessageHandler::send(const Message &message) const
 {
@@ -41,7 +29,7 @@ string MessageHandler::encode(const Message &message) const
 string MessageHandler::readPackage() const
 {
     string s;
-    char ch;
+    unsigned char ch;
     while ((ch = conn->read()) != '$')
     {
         s += ch;
@@ -89,64 +77,4 @@ void MessageHandler::writeString(const string &s) const
         conn->write(c);
     }
     conn->write('$');
-}
-
-void MessageHandler::exec(const Message &message) const
-{
-    Message ms = Message{};
-    try
-    {
-        switch (message.command)
-        {
-        case Protocol::COM_LIST_NG:
-        {
-            // read rest of the parameters and process
-            // generate respose
-            break;
-        }
-        case Protocol::COM_LIST_ART:
-        {
-            // read rest of the parameters and process
-            // generate respose
-            break;
-        }
-        case Protocol::COM_CREATE_NG:
-        {
-            // read rest of the parameters and process
-            // generate respose
-            break;
-        }
-        case Protocol::COM_CREATE_ART:
-        {
-            // read rest of the parameters and process
-            // generate respose
-            break;
-        }
-        case Protocol::COM_DELETE_NG:
-        {
-            // read rest of the parameters and process
-            // generate respose
-            break;
-        }
-        case Protocol::COM_DELETE_ART:
-        {
-            // read rest of the parameters and process
-            // generate respose
-            break;
-        }
-        case Protocol::COM_GET_ART:
-        {
-            // read rest of the parameters and process
-            // generate respose
-            break;
-        }
-        default:
-            break;
-        }
-    }
-    catch (DBException &err)
-    {
-        // generate exception message
-    }
-    send(ms);
 }
