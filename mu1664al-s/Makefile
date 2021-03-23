@@ -9,8 +9,8 @@ clean:
 	make -C src clean
 
 distclean:
-	rm bin/* bin/.keep
 	make -C src distclean
+	rm bin/* bin/.keep
 
 install:
 	make -C src install

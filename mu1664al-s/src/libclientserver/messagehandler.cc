@@ -29,17 +29,20 @@ void MessageHandler::send(const Message &message) const
 Message MessageHandler::decode(string package) const
 {
     // generate a message from byte data
+    Message ms = Message{};
+    return ms;
 }
 
 string MessageHandler::encode(const Message &message) const
 {
+    return "";
 }
 
 string MessageHandler::readPackage() const
 {
     string s;
     char ch;
-    while ((ch = conn.read()) != '$')
+    while ((ch = conn->read()) != '$')
     {
         s += ch;
     }

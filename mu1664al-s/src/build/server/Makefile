@@ -50,7 +50,7 @@ distclean: clean
 	-rm -r $(addsuffix .dSym,$(PROGS)) # for cleaning on Macs
 
 install:
-	cp $(PROGS) ../../../bin
+	cp serverdisk serverinmemory ../../../bin
 
 # Include the *.d files
 -include $(SRC:.cc=.d)

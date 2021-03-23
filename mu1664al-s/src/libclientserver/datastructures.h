@@ -8,7 +8,7 @@
 using std::string;
 using std::vector;
 
-using ID = unsigned int;
+using ID = int;
 
 struct Article
 {
