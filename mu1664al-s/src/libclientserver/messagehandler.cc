@@ -50,7 +50,7 @@ void MessageHandler::sendRequest(Protocol command, const std::vector<Parameter> 
 {
 }
 
-Parameter MessageHandler::numParam(unsigned int num) const
+Parameter MessageHandler::numParam(int num) const
 {
     return make_pair(Param{Protocol::PAR_NUM, num, ""}, Param{});
 }
@@ -60,7 +60,7 @@ Parameter MessageHandler::strParam(string str) const
     return make_pair(Param{Protocol::PAR_STRING, 0, str}, Param{});
 }
 
-unsigned int MessageHandler::decodeNumber(const string &str) const
+int MessageHandler::decodeNumber(const string &str) const
 {
     unsigned char byte1 = str[0];
     unsigned char byte2 = str[1];
@@ -69,7 +69,7 @@ unsigned int MessageHandler::decodeNumber(const string &str) const
     return (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
 }
 
-string MessageHandler::encodeNumber(unsigned int value) const
+string MessageHandler::encodeNumber(int value) const
 {
     string str = "";
     str += (value >> 24) & 0xFF;
