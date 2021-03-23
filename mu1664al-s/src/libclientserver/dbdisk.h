@@ -8,7 +8,7 @@ class DBDisk : public DBInterface
 public:
     ~DBDisk();
     DBDisk() = default;
-    bool writeArticle(ID group, Article article);
+    void writeArticle(ID group, Article article);
 
     Article readArticle(ID group, ID article);
 
@@ -18,9 +18,9 @@ public:
 
     Articles readArticles(ID group);
 
-    bool deleteArticle(ID group, ID article);
+    void deleteArticle(ID group, ID article);
 
-    bool deleteGroup(ID group);
+    void deleteGroup(ID group);
 };
 
 #endif

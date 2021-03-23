@@ -1,6 +1,6 @@
 #include "dbinmemory.h"
 
-bool DBInMemory::writeArticle(ID group, Article article)
+void DBInMemory::writeArticle(ID group, Article article)
 {
 }
 
@@ -20,10 +20,10 @@ Articles DBInMemory::readArticles(ID group)
 {
 }
 
-bool DBInMemory::deleteArticle(ID group, ID article)
+void DBInMemory::deleteArticle(ID group, ID article)
 {
 }
 
-bool DBInMemory::deleteGroup(ID group)
+void DBInMemory::deleteGroup(ID group)
 {
 }

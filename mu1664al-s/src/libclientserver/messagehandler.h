@@ -7,21 +7,25 @@
 #include "connection.h"
 #include <string>
 #include <vector>
+#include <utility>
 
+using std::make_pair;
 using std::shared_ptr;
 
-struct Parameter
+struct Param
 {
     Protocol type;
     unsigned int N;
     string str;
 };
 
+using Parameter = std::pair<Param, Param>;
+
 struct Message
 {
     Protocol command;
     Protocol status;
-    std::vector<Parameter> parameters;
+    std::vector<Parameter> parameters; //
     Protocol end;
 };
 
@@ -47,7 +51,8 @@ private:
     string encode(const Message &message) const;
     void exec(const Message &message) const;
     string readPackage() const;
-    unsigned int readNumber() const;
+    unsigned int decodeNumber(const string &str) const;
+    string encodeNumber(unsigned int num) const;
     void writeString(const string &s) const;
     void send(const Message &message) const;
 };
