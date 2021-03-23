@@ -20,6 +20,7 @@ struct Param
 };
 
 using Parameter = std::pair<Param, Param>;
+using Parameters = std::vector<Parameter>;
 
 struct Message
 {
@@ -40,7 +41,7 @@ public:
     // Server requests are rejected iConnectionf there are no db provided
     // Response message is generated and returned
     void handle() const;
-    void sendRequest(Protocol command, const std::vector<Parameter> &parameters) const;
+    void sendRequest(Protocol command, const Parameters &parameters) const;
     Parameter numParam(unsigned int num) const;
     Parameter strParam(string str) const;
 
