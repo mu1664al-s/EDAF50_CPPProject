@@ -4,18 +4,18 @@
 using std::cout;
 using std::endl;
 
-void MessageHandler::handle(const char *package) const
+void MessageHandler::handle() const
 {
-    Message ms = decode(package); // decode
+    Message ms = decode(readPackage()); // decode
     if (ms.status == Protocol::ANS_ACK)
     {
-        // handle response package
+        // handle response package, can be an error
         // print result
         return;
     }
     if (ms.status == Protocol::ANS_NAK)
     {
-        // handle response package
+        // handle response package, can be an error
         // print result
         return;
     }
@@ -26,21 +26,57 @@ void MessageHandler::send(const Message &message) const
     writeString(encode(message));
 }
 
-Message MessageHandler::decode(const char *package) const
+Message MessageHandler::decode(string package) const
 {
+    // generate a message from byte data
 }
 
 string MessageHandler::encode(const Message &message) const
 {
 }
 
-unsigned int MessageHandler::readNumber() const
+string MessageHandler::readPackage() const
 {
-    unsigned char byte1 = conn->read();
-    unsigned char byte2 = conn->read();
-    unsigned char byte3 = conn->read();
-    unsigned char byte4 = conn->read();
+    string s;
+    char ch;
+    while ((ch = conn.read()) != '$')
+    {
+        s += ch;
+    }
+    return s;
+}
+
+void MessageHandler::sendRequest(Protocol command, const std::vector<Parameter> &parameters) const
+{
+}
+
+Parameter MessageHandler::numParam(unsigned int num) const
+{
+    return make_pair(Param{Protocol::PAR_NUM, num, ""}, Param{});
+}
+
+Parameter MessageHandler::strParam(string str) const
+{
+    return make_pair(Param{Protocol::PAR_STRING, 0, str}, Param{});
+}
+
+unsigned int MessageHandler::decodeNumber(const string &str) const
+{
+    unsigned char byte1 = str[0];
+    unsigned char byte2 = str[1];
+    unsigned char byte3 = str[2];
+    unsigned char byte4 = str[3];
     return (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
+}
+
+string MessageHandler::encodeNumber(unsigned int value) const
+{
+    string str = "";
+    str += (value >> 24) & 0xFF;
+    str += (value >> 16) & 0xFF;
+    str += (value >> 8) & 0xFF;
+    str += value & 0xFF;
+    return str;
 }
 
 void MessageHandler::writeString(const string &s) const

@@ -7,21 +7,25 @@
 #include "connection.h"
 #include <string>
 #include <vector>
+#include <utility>
 
+using std::make_pair;
 using std::shared_ptr;
 
-struct Parameter
+struct Param
 {
     Protocol type;
     unsigned int N;
     string str;
 };
 
+using Parameter = std::pair<Param, Param>;
+
 struct Message
 {
     Protocol command;
     Protocol status;
-    std::vector<Parameter> parameters;
+    std::vector<Parameter> parameters; //
     Protocol end;
 };
 
@@ -35,17 +39,22 @@ public:
     // parse and handle messages. throws exception
     // Server requests are rejected iConnectionf there are no db provided
     // Response message is generated and returned
-    void handle(const char *package) const;
-    void send(const Message &message) const;
+    void handle() const;
+    void sendRequest(Protocol command, const std::vector<Parameter> &parameters) const;
+    Parameter numParam(unsigned int num) const;
+    Parameter strParam(string str) const;
 
 private:
     const shared_ptr<Connection> &conn;
     const shared_ptr<DBInterface> &db;
-    Message decode(const char *package) const;
+    Message decode(string package) const;
     string encode(const Message &message) const;
     void exec(const Message &message) const;
-    unsigned int readNumber() const;
+    string readPackage() const;
+    unsigned int decodeNumber(const string &str) const;
+    string encodeNumber(unsigned int num) const;
     void writeString(const string &s) const;
+    void send(const Message &message) const;
 };
 
 #endif

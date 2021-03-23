@@ -24,7 +24,7 @@ class DBInterface
 public:
 	virtual ~DBInterface() = default;
 
-	virtual bool writeArticle(ID group, Article article) = 0;
+	virtual void writeArticle(ID group, Article article) = 0;
 
 	virtual Article readArticle(ID group, ID article) = 0;
 
@@ -34,9 +34,9 @@ public:
 
 	virtual Articles readArticles(ID group) = 0;
 
-	virtual bool deleteArticle(ID group, ID article) = 0;
+	virtual void deleteArticle(ID group, ID article) = 0;
 
-	virtual bool deleteGroup(ID group) = 0;
+	virtual void deleteGroup(ID group) = 0;
 };
 
 #endif

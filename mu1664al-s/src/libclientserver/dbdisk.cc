@@ -1,6 +1,6 @@
 #include "dbdisk.h"
 
-bool DBDisk::writeArticle(ID group, Article article)
+void DBDisk::writeArticle(ID group, Article article)
 {
 }
 
@@ -20,10 +20,10 @@ Articles DBDisk::readArticles(ID group)
 {
 }
 
-bool DBDisk::deleteArticle(ID group, ID article)
+void DBDisk::deleteArticle(ID group, ID article)
 {
 }
 
-bool DBDisk::deleteGroup(ID group)
+void DBDisk::deleteGroup(ID group)
 {
 }

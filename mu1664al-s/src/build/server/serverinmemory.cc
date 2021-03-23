@@ -16,21 +16,9 @@ int main(int argc, char *argv[])
         {
             try
             {
-                int nbr = base_server.readNumber(conn);
-                string result;
-                if (nbr > 0)
-                {
-                    result = "positive";
-                }
-                else if (nbr == 0)
-                {
-                    result = "zero";
-                }
-                else
-                {
-                    result = "negative";
-                }
-                base_server.writeString(conn, result);
+                shared_ptr<DBInterface> db = make_shared<DBInterface>(DBInMemory());
+                MessageHandler msh = MessageHandler(db, conn);
+                msh.handle();
             }
             catch (ConnectionClosedException &)
             {

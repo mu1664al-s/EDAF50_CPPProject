@@ -1,10 +1,8 @@
 #ifndef SERVER_BASE_H
 #define SERVER_BASE_H
 
-#include "connection.h"
 #include "connectionclosedexception.h"
 #include "server.h"
-#include "dbinterface.h"
 #include "messagehandler.h"
 
 #include <cstdlib>
@@ -29,27 +27,6 @@ using std::stoi;
 class ServerBase
 {
 public:
-    int readNumber(const shared_ptr<Connection> &conn)
-    {
-        unsigned char byte1 = conn->read();
-        unsigned char byte2 = conn->read();
-        unsigned char byte3 = conn->read();
-        unsigned char byte4 = conn->read();
-        return (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
-    }
-
-    /*
- * Send a string to a client.
- */
-    void writeString(const shared_ptr<Connection> &conn, const string &s)
-    {
-        for (char c : s)
-        {
-            conn->write(c);
-        }
-        conn->write('$');
-    }
-
     Server init(int argc, char *argv[])
     {
         if (argc != 2)

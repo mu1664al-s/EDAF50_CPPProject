@@ -8,19 +8,19 @@ class DBInMemory : public DBInterface
 public:
     ~DBInMemory();
     DBInMemory() = default;
-    bool writeArticle(ID group, Article article) = 0;
+    void writeArticle(ID group, Article article);
 
-    Article readArticle(ID group, ID article) = 0;
+    Article readArticle(ID group, ID article);
 
-    Groups readGroups() = 0;
+    Groups readGroups();
 
-    void writeGroup(string name) = 0;
+    void writeGroup(string name);
 
-    Articles readArticles(ID group) = 0;
+    Articles readArticles(ID group);
 
-    bool deleteArticle(ID group, ID article) = 0;
+    void deleteArticle(ID group, ID article);
 
-    bool deleteGroup(ID group) = 0;
+    void deleteGroup(ID group);
 };
 
 #endif
