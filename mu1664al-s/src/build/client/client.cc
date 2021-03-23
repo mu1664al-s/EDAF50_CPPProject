@@ -1,4 +1,3 @@
-#include "connection.h"
 #include "connectionclosedexception.h"
 #include "messagehandler.h"
 
@@ -18,34 +17,6 @@ using std::string;
 // ATTENTION this is the provided test client.
 // It will be the base of our client
 
-/*
- * Send an integer to the server as four bytes.
- */
-void writeNumber(const Connection &conn, int value)
-{
-    conn.write((value >> 24) & 0xFF);
-    conn.write((value >> 16) & 0xFF);
-    conn.write((value >> 8) & 0xFF);
-    conn.write(value & 0xFF);
-}
-
-/*
- * Read a string from the server.
- */
-string readString(const Connection &conn)
-{
-    string s;
-    char ch;
-    while ((ch = conn.read()) != '$')
-    {
-        s += ch;
-    }
-    return s;
-}
-
-/* Creates a client for the given args, if possible.
- * Otherwise exits with error code.
- */
 Connection init(int argc, char *argv[])
 {
     if (argc != 3)
@@ -75,32 +46,50 @@ Connection init(int argc, char *argv[])
     return conn;
 }
 
-int app(const Connection &conn)
+void handleCommand(const MessageHandler &msh, int command)
 {
-    cout << "Type a number: ";
-    int nbr;
-    while (cin >> nbr)
+    // do the same for the rest of the commands
+    switch (command)
     {
+    case static_cast<int>(Protocol::COM_CREATE_NG):
+    {
+        // guide user through input
+        // generate params
+        Parameters params;
+        msh.sendRequest(Protocol::COM_CREATE_NG, params);
+        break;
+    }
+    default:
+        break;
+    }
+}
+
+int app(const MessageHandler &msh)
+{
+    // print the commands here
+    cout << "Type a command (number): ";
+    int command;
+    while (cin >> command)
+    {
+        cout << endl;
         try
         {
-            cout << nbr << " is ...";
-            writeNumber(conn, nbr);
-            string reply = readString(conn);
-            cout << " " << reply << endl;
-            cout << "Type another number: ";
+            handleCommand(msh, command);
         }
         catch (ConnectionClosedException &)
         {
             cout << " no reply from server. Exiting." << endl;
             return 1;
         }
+        // print the commands here
+        cout << "Next command (number): ";
     }
-    cout << "\nexiting.\n";
     return 0;
 }
 
 int main(int argc, char *argv[])
 {
     Connection conn = init(argc, argv);
-    return app(conn);
+    MessageHandler msh = MessageHandler(conn);
+    return app(msh);
 }
