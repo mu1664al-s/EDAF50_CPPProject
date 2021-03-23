@@ -64,7 +64,15 @@ void handleCommand(const MessageHandler &msh, int command)
     default:
         break;
     }
-    msh.handle();
+    Message ms = msh.recieve();
+    if (ms.status == Protocol::ANS_ACK)
+    {
+        // good
+    }
+    else
+    {
+        // bad
+    }
 }
 
 int app(const MessageHandler &msh)
