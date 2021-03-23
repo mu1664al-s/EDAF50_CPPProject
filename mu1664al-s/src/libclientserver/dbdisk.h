@@ -8,19 +8,19 @@ class DBDisk : public DBInterface
 public:
     ~DBDisk();
     DBDisk() = default;
-    void writeArticle(ID group, Article article);
+    virtual void writeArticle(ID group, Article article);
 
-    Article readArticle(ID group, ID article);
+    virtual Article readArticle(ID group, ID article);
 
-    Groups readGroups();
+    virtual Groups readGroups();
 
-    void writeGroup(string name);
+    virtual void writeGroup(string name);
 
-    Articles readArticles(ID group);
+    virtual Articles readArticles(ID group);
 
-    void deleteArticle(ID group, ID article);
+    virtual void deleteArticle(ID group, ID article);
 
-    void deleteGroup(ID group);
+    virtual void deleteGroup(ID group);
 };
 
 #endif

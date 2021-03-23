@@ -1,5 +1,9 @@
 #include "dbinmemory.h"
 
+DBInMemory::~DBInMemory()
+{
+}
+
 void DBInMemory::writeArticle(ID group, Article article)
 {
 }

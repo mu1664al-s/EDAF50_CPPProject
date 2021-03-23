@@ -1,5 +1,9 @@
 #include "dbdisk.h"
 
+DBDisk::~DBDisk()
+{
+}
+
 void DBDisk::writeArticle(ID group, Article article)
 {
 }

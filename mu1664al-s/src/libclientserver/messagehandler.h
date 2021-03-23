@@ -5,6 +5,7 @@
 #include "dbinterface.h"
 #include "protocol.h"
 #include "connection.h"
+#include <memory>
 #include <string>
 #include <vector>
 #include <utility>
@@ -21,6 +22,7 @@ struct Param
 
 using Parameter = std::pair<Param, Param>;
 using Parameters = std::vector<Parameter>;
+using SharedConnection = std::shared_ptr<Connection>;
 
 struct Message
 {
@@ -33,9 +35,9 @@ struct Message
 class MessageHandler
 {
 public:
-    ~MessageHandler();
+    ~MessageHandler(){};
     MessageHandler(const shared_ptr<Connection> &conn) : db(nullptr), conn(conn) {}
-    MessageHandler(const shared_ptr<DBInterface> &db, const shared_ptr<Connection> &conn) : db(db), conn(conn) {}
+    MessageHandler(const shared_ptr<DBInterface> &db, const SharedConnection &conn) : db(db), conn(conn) {}
 
     // parse and handle messages. throws exception
     // Server requests are rejected iConnectionf there are no db provided
@@ -46,8 +48,8 @@ public:
     Parameter strParam(string str) const;
 
 private:
-    const shared_ptr<Connection> &conn;
     const shared_ptr<DBInterface> &db;
+    const SharedConnection &conn;
     Message decode(string package) const;
     string encode(const Message &message) const;
     void exec(const Message &message) const;

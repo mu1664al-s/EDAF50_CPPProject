@@ -49,7 +49,7 @@ distclean: clean
 	-rm -r $(addsuffix .dSym,$(PROGS)) # for cleaning on Macs
 
 install:
-	cp $(PROGS) ../../../bin
+	cp client ../../../bin
 
 # Include the *.d files
 -include $(SRC:.cc=.d)

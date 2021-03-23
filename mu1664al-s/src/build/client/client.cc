@@ -5,12 +5,14 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <memory>
 
 using std::cerr;
 using std::cin;
 using std::cout;
 using std::endl;
 using std::exception;
+using std::make_shared;
 using std::stoi;
 using std::string;
 
@@ -90,7 +92,6 @@ int app(const MessageHandler &msh)
 
 int main(int argc, char *argv[])
 {
-    Connection conn = init(argc, argv);
-    MessageHandler msh = MessageHandler(conn);
+    MessageHandler msh = MessageHandler(make_shared<Connection>(init(argc, argv)));
     return app(msh);
 }

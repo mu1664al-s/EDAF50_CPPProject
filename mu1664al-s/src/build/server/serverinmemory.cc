@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
         {
             try
             {
-                shared_ptr<DBInterface> db = make_shared<DBInterface>(DBInMemory());
+                shared_ptr<DBInterface> db = make_shared<DBInMemory>(DBInMemory());
                 MessageHandler msh = MessageHandler(db, conn);
                 msh.handle();
             }
