@@ -23,17 +23,19 @@ class DBInterface
 public:
 	virtual ~DBInterface() = default;
 
-	/*
-	 * Insert a name/address pair. Does not check if the name
-	 * or address already exists.
-	 */
-	virtual bool writeArticle(Group group, Article article) = 0;
+	virtual bool writeArticle(ID group, Article article) = 0;
 
-	/*
-	 * Insert a name/address pair. Does not check if the name
-	 * or address already exists.
-	 */
-	virtual Article readArticle(Group group, Article article) = 0;
+	virtual Article readArticle(ID group, ID article) = 0;
+
+	virtual Groups readGroups() = 0;
+
+	virtual void writeGroup(string name) = 0;
+
+	virtual Articles readArticles(ID group) = 0;
+
+	virtual bool deleteArticle(ID group, ID article) = 0;
+
+	virtual bool deleteGroup(ID group) = 0;
 };
 
 #endif

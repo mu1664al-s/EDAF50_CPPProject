@@ -2,22 +2,32 @@
 #ifndef MESSAGES_HANDLER_H
 #define MESSAGES_HANDLER_H
 
+#include "dbinterface.h"
+#include "protocol.h"
+#include "connection.h"
 #include <string>
+#include <vector>
+
+using std::shared_ptr;
+
+struct Parameter
+{
+    Protocol type;
+    unsigned int N;
+    string str;
+};
 
 struct Message
 {
-};
-
-enum class MessageExceptionType
-{
-    ILLEGAL_MESSAGE = 0, // connection will disconnect when thrown
-    GROUP_NOT_FOUND = 1,
-    ARTICLE_NOT_FOUND = 2,
+    Protocol command;
+    Protocol response;
+    std::vector<Parameter> parameters;
+    Protocol end;
 };
 
 struct MessageException
 {
-    int type;
+    int type; // error code defined in protocol
     std::string message;
 };
 
@@ -25,17 +35,20 @@ class MessageHandler
 {
 public:
     ~MessageHandler();
-    MessageHandler() = default;
+    MessageHandler(const shared_ptr<Connection> &conn) : db(nullptr), conn(conn) {}
+    MessageHandler(const shared_ptr<DBInterface> &db, const shared_ptr<Connection> &conn) : db(db), conn(conn) {}
 
     // parse and handle messages. throws exception
-    // Server requests are rejected if there are no db provided
+    // Server requests are rejected iConnectionf there are no db provided
     // Response message is generated and returned
     Message handle(const char *package) const;
-    const char *package(const Message &message) const;
+    void send(const Message &message) const;
 
 private:
+    const shared_ptr<Connection> &conn;
+    const shared_ptr<DBInterface> &db;
     Message decode(const char *package) const;
-    const char *encode(const Message &message) const;
+    Message exec(const Message &message) const;
 };
 
 #endif

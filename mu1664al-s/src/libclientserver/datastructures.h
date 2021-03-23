@@ -8,9 +8,11 @@
 using std::string;
 using std::vector;
 
+using ID = unsigned int;
+
 struct Article
 {
-    unsigned int id; // unique
+    ID id; // unique
     string name;
     string author;
     string title;
@@ -21,8 +23,8 @@ using Articles = vector<Article>;
 
 struct Group
 {
-    unsigned int id; // unique
-    string name;     // unique
+    ID id;       // unique
+    string name; // unique
     Articles articles;
 };
 
