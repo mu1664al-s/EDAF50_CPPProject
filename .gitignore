@@ -1,7 +1,7 @@
 *
 !/**/
 !Makefile
-!README
+!README.md
 !*.h*
 !*.cc*
 !*.jar*
