@@ -33,8 +33,6 @@
 #include <memory>
 #include <vector>
 
-using SharedConnection = std::shared_ptr<Connection>;
-
 /* A server listens to a port and handles multiple connections */
 class Server
 {
@@ -51,13 +49,13 @@ public:
   /* Waits for activity on the port. Returns a previously registered
            connection object if an existing client wishes to communicate,
            nullptr if a new client wishes to communicate */
-  SharedConnection waitForActivity() const;
+  std::shared_ptr<Connection> waitForActivity() const;
 
   /* Registers a new connection */
-  void registerConnection(const SharedConnection &conn);
+  void registerConnection(const std::shared_ptr<Connection> &conn);
 
   /* Deregisters a connection */
-  void deregisterConnection(const SharedConnection &conn);
+  void deregisterConnection(const std::shared_ptr<Connection> &conn);
 
   /* Servers cannot be copied or assigned*/
   Server(const Server &) = delete;
@@ -74,7 +72,7 @@ protected:
   int my_socket{Connection::no_socket};
 
   /* List of registered connections */
-  std::vector<SharedConnection> connections;
+  std::vector<std::shared_ptr<Connection>> connections;
 
   /* Socket for a connection waiting to be registered */
   mutable int pending_socket{Connection::no_socket};

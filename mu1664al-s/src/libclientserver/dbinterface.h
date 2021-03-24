@@ -4,7 +4,33 @@
 #ifndef DB_INTERFACE_H
 #define DB_INTERFACE_H
 
-#include "datastructures.h"
+#include <string>
+#include <vector>
+
+using std::string;
+using std::vector;
+
+using ID = int;
+
+struct Article
+{
+	ID id; // unique
+	string name;
+	string author;
+	string title;
+	string text;
+};
+
+using Articles = vector<Article>;
+
+struct Group
+{
+	ID id;		 // unique
+	string name; // unique
+	Articles articles;
+};
+
+using Groups = vector<Group>;
 
 enum class DBExceptionType
 {

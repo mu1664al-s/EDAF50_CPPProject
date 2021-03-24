@@ -86,7 +86,7 @@ Server::~Server()
 
 bool Server::isReady() const { return my_socket != Connection::no_socket; }
 
-SharedConnection Server::waitForActivity() const
+std::shared_ptr<Connection> Server::waitForActivity() const
 {
         if (my_socket == Connection::no_socket)
         {
@@ -101,7 +101,7 @@ SharedConnection Server::waitForActivity() const
                 FD_SET(conn->getSocket(), &read_template);
         }
 
-        SharedConnection return_conn;
+        std::shared_ptr<Connection> return_conn;
         select(FD_SETSIZE, &read_template, 0, 0, 0);
         if (FD_ISSET(my_socket, &read_template))
         {
@@ -120,7 +120,7 @@ SharedConnection Server::waitForActivity() const
         else
         {
                 auto it = find_if(connections.begin(), connections.end(),
-                                  [&](const SharedConnection &conn) {
+                                  [&](const std::shared_ptr<Connection> &conn) {
                                           return FD_ISSET(conn->getSocket(),
                                                           &read_template);
                                   });
@@ -133,7 +133,7 @@ SharedConnection Server::waitForActivity() const
         return return_conn;
 }
 
-void Server::registerConnection(const SharedConnection &conn)
+void Server::registerConnection(const std::shared_ptr<Connection> &conn)
 {
         if (conn->getSocket() != Connection::no_socket)
         {
@@ -148,7 +148,7 @@ void Server::registerConnection(const SharedConnection &conn)
         pending_socket = Connection::no_socket;
 }
 
-void Server::deregisterConnection(const SharedConnection &conn)
+void Server::deregisterConnection(const std::shared_ptr<Connection> &conn)
 {
         connections.erase(
             std::remove(connections.begin(), connections.end(), conn),

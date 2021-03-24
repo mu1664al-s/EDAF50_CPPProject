@@ -29,7 +29,7 @@ class ServerBase
 {
 public:
     void exec(const MessageHandler &msh,
-              const shared_ptr<DBInterface> &db, const Message &message)
+              const DBInterface &db, const Message &message)
     {
         Message ms = Message{};
         try

@@ -37,7 +37,7 @@ string MessageHandler::readPackage() const
     return s;
 }
 
-void MessageHandler::sendRequest(Protocol command, const std::vector<Parameter> &parameters) const
+void MessageHandler::sendRequest(Protocol command, const Parameters &parameters) const
 {
 }
 
