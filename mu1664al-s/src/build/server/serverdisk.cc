@@ -11,12 +11,12 @@ int main(int argc, char *argv[])
 
     while (true)
     {
-        SharedConnection conn = server.waitForActivity();
+        shared_ptr<Connection> conn = server.waitForActivity();
         if (conn != nullptr)
         {
             try
             {
-                shared_ptr<DBInterface> db = make_shared<DBDisk>(DBDisk());
+                const DBInterface &db = DBDisk();
                 MessageHandler msh = MessageHandler(conn);
                 Message ms = msh.recieve();
                 base_server.exec(msh, db, ms);
