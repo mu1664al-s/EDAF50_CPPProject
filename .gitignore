@@ -5,6 +5,7 @@
 !*.h*
 !*.cc*
 !*.jar*
+!*.png*
 !.gitignore
 !.keep
 !./clientserver/bin

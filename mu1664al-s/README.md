@@ -4,7 +4,13 @@ A simple single threaded news server that communicates with the client using a s
 
 ## About
 
-The server can handle multiple connections. There are two types of servers. Executable "serverinmemory" is an in memory server while "serverdisk" on the other hand uses a filesystem. The interactions with the two different types of databases are defined in the "dbinterface.h" interface. The databases themselves are implemented in "dbdisk.cc" and "dbinmemory.cc". The message handler is denined in "messagehandler.h". This class takes in a connection and handles all communication with a very high abstraction level. It can "recieve" incomming packages and "sendRequest" send requests to the server.
+The server can handle multiple connections. There are two types of servers. Executable "serverinmemory" is an in memory server while "serverdisk" on the other hand uses a filesystem. The interactions with the two different types of databases are defined in the "dbinterface.h" interface. The databases themselves are implemented in "dbdisk.cc" and "dbinmemory.cc". The message handler is denined in "messagehandler.h". This class takes in a shared pointer to a connection and handles all communication using a very high abstraction level. It can "recieve" incomming packages, "sendRequest" to the server and "send" and message back to the client.
+
+There are some structures in use, such as "Parameter", "Message", "Article" and more that are defined in either the "dbinterface.h" or "messagehandler.h". Other data types like "Parameters" and "Articles" and "Groups" are also defined together with these structures.
+
+### UML
+
+![UML diagram](./UMLCPP.png)
 
 ## Installation
 
@@ -43,7 +49,6 @@ Will be updated.
 │   │   ├── connection.cc
 │   │   ├── connectionclosedexception.h
 │   │   ├── connection.h
-│   │   ├── datastructures.h
 │   │   ├── dbdisk.cc
 │   │   ├── dbdisk.h
 │   │   ├── dbinmemory.cc
@@ -61,5 +66,6 @@ Will be updated.
 │   │   └── myserver.cc
 │   └── Makefile
 ├── Makefile
-└── README.md
+├── README.md
+└── UMLCPP.png
 ```
