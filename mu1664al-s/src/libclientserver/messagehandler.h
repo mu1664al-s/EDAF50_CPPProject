@@ -20,6 +20,17 @@ struct Param
     string str;
 };
 
+enum class MessageExceptionType
+{
+    ILLEGAL_MESSAGE = 0,
+};
+
+struct MessageException
+{
+    MessageExceptionType type;
+    string message;
+};
+
 using Parameter = std::pair<Param, Param>;
 using Parameters = std::vector<Parameter>;
 
