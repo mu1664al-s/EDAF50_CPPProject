@@ -14,7 +14,7 @@ void MessageHandler::send(const Message &message) const
     writeString(encode(message));
 }
 
-Message MessageHandler::decode(string package) const
+Message MessageHandler::decode(const string &package) const
 {
     // generate a message from byte data
     Message ms = Message{};
@@ -37,7 +37,7 @@ string MessageHandler::readPackage() const
     return s;
 }
 
-void MessageHandler::sendRequest(Protocol command, const Parameters &parameters) const
+void MessageHandler::sendRequest(const Protocol &command, const Parameters &parameters) const
 {
 }
 
@@ -46,7 +46,7 @@ Parameter MessageHandler::numParam(int num) const
     return make_pair(Param{Protocol::PAR_NUM, num, ""}, Param{});
 }
 
-Parameter MessageHandler::strParam(string str) const
+Parameter MessageHandler::strParam(const string &str) const
 {
     return make_pair(Param{Protocol::PAR_STRING, 0, str}, Param{});
 }
@@ -70,9 +70,9 @@ string MessageHandler::encodeNumber(int value) const
     return str;
 }
 
-void MessageHandler::writeString(const string &s) const
+void MessageHandler::writeString(const string &str) const
 {
-    for (char c : s)
+    for (char c : str)
     {
         conn->write(c);
     }

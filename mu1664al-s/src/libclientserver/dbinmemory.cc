@@ -4,7 +4,7 @@ DBInMemory::~DBInMemory()
 {
 }
 
-void DBInMemory::writeArticle(ID group, Article article)
+void DBInMemory::writeArticle(ID group, const Article &article)
 {
 }
 
@@ -16,7 +16,7 @@ Groups DBInMemory::readGroups()
 {
 }
 
-void DBInMemory::writeGroup(string name)
+void DBInMemory::writeGroup(const string &name)
 {
 }
 
