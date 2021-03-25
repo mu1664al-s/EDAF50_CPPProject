@@ -38,7 +38,7 @@ struct Message
 {
     Protocol command;
     Protocol status;
-    Parameters parameters; //
+    Parameters parameters;
     Protocol end;
 };
 
@@ -52,20 +52,20 @@ public:
     // Server requests are rejected iConnectionf there are no db provided
     // Response message is generated and returned
     Message recieve() const;
-    void sendRequest(Protocol command, const Parameters &parameters) const;
+    void sendRequest(const Protocol &command, const Parameters &parameters) const;
     Parameter numParam(int num) const;
-    Parameter strParam(string str) const;
+    Parameter strParam(const string &str) const;
     void send(const Message &message) const;
 
 private:
     const shared_ptr<Connection> &conn;
-    Message decode(string package) const;
+    Message decode(const string &package) const;
     string encode(const Message &message) const;
     void exec(const Message &message) const;
     string readPackage() const;
     int decodeNumber(const string &str) const;
     string encodeNumber(int num) const;
-    void writeString(const string &s) const;
+    void writeString(const string &str) const;
 };
 
 #endif

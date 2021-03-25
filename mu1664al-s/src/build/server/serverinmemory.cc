@@ -8,6 +8,7 @@ int main(int argc, char *argv[])
 {
     ServerBase base_server = ServerBase();
     Server server = base_server.init(argc, argv);
+    const DBInterface &db = DBInMemory();
 
     while (true)
     {
@@ -16,7 +17,6 @@ int main(int argc, char *argv[])
         {
             try
             {
-                const DBInterface &db = DBInMemory();
                 MessageHandler msh = MessageHandler(conn);
                 Message ms = msh.recieve();
                 base_server.exec(msh, db, ms);

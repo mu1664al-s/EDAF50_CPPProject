@@ -50,13 +50,13 @@ class DBInterface
 public:
 	virtual ~DBInterface() = default;
 
-	virtual void writeArticle(ID group, Article article) = 0;
+	virtual void writeArticle(ID group, const Article &article) = 0;
 
 	virtual Article readArticle(ID group, ID article) = 0;
 
 	virtual Groups readGroups() = 0;
 
-	virtual void writeGroup(string name) = 0;
+	virtual void writeGroup(const string &name) = 0;
 
 	virtual Articles readArticles(ID group) = 0;
 

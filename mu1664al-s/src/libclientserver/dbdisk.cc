@@ -4,7 +4,7 @@ DBDisk::~DBDisk()
 {
 }
 
-void DBDisk::writeArticle(ID group, Article article)
+void DBDisk::writeArticle(ID group, const Article &article)
 {
 }
 
@@ -16,7 +16,7 @@ Groups DBDisk::readGroups()
 {
 }
 
-void DBDisk::writeGroup(string name)
+void DBDisk::writeGroup(const string &name)
 {
 }
 

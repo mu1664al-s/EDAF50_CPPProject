@@ -8,13 +8,13 @@ class DBDisk : public DBInterface
 public:
     ~DBDisk();
     DBDisk() = default;
-    virtual void writeArticle(ID group, Article article);
+    virtual void writeArticle(ID group, const Article &article);
 
     virtual Article readArticle(ID group, ID article);
 
     virtual Groups readGroups();
 
-    virtual void writeGroup(string name);
+    virtual void writeGroup(const string &name);
 
     virtual Articles readArticles(ID group);
 
