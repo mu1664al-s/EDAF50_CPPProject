@@ -67,11 +67,20 @@ void handleCommand(const MessageHandler &msh, int command)
     Message ms = msh.recieve();
     if (ms.status == Protocol::ANS_ACK)
     {
-        // good
+        switch (ms.command)
+        {
+        case Protocol::ANS_CREATE_NG:
+        {
+            // handle response data
+            break;
+        }
+        default:
+            break;
+        }
     }
     else
     {
-        // bad
+        // handle rejection
     }
 }
 
