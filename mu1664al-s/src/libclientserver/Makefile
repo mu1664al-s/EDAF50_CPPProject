@@ -27,8 +27,8 @@ all: libclientserver.a
 # Create the library; ranlib is for Darwin (OS X) and maybe other systems.
 # Doesn't seem to do any damage on other systems.
 
-libclientserver.a: server.o dbdisk.o dbinmemory.o connection.o messagehandler.o
-	ar rv libclientserver.a server.o dbdisk.o dbinmemory.o connection.o messagehandler.o
+libclientserver.a: server.o dbdisk.o dbinmemory.o connection.o message.o messagehandler.o
+	ar rv libclientserver.a server.o dbdisk.o dbinmemory.o connection.o message.o messagehandler.o
 	ranlib libclientserver.a
 
 # Phony targets

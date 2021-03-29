@@ -57,17 +57,17 @@ void handleCommand(const MessageHandler &msh, int command)
     {
         // guide user through input
         // generate params
-        Parameters params;
-        msh.sendRequest(Protocol::COM_CREATE_NG, params);
+        Message ms;
+        msh.send(ms);
         break;
     }
     default:
         break;
     }
     Message ms = msh.recieve();
-    if (ms.status == Protocol::ANS_ACK)
+    if (ms.getStatus() == Protocol::ANS_ACK)
     {
-        switch (ms.command)
+        switch (ms.getCommand())
         {
         case Protocol::ANS_CREATE_NG:
         {
