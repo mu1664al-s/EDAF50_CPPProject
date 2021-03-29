@@ -10,27 +10,21 @@
 using std::string;
 using std::vector;
 
-using ID = int;
-
 struct Article
 {
-	ID id; // unique
-	string name;
-	string author;
-	string title;
-	string text;
+	const int id; // unique
+	const string name;
+	const string author;
+	const string title;
+	const string text;
 };
-
-using Articles = vector<Article>;
 
 struct Group
 {
-	ID id;		 // unique
-	string name; // unique
-	Articles articles;
+	const int id;	   // unique
+	const string name; // unique
+	const vector<Article> articles;
 };
-
-using Groups = vector<Group>;
 
 enum class DBExceptionType
 {
@@ -50,19 +44,19 @@ class DBInterface
 public:
 	virtual ~DBInterface() = default;
 
-	virtual void writeArticle(ID group, const Article &article) = 0;
+	virtual void writeArticle(int group, const Article &article) = 0;
 
-	virtual Article readArticle(ID group, ID article) = 0;
+	virtual const Article readArticle(int group, int article) = 0;
 
-	virtual Groups readGroups() = 0;
+	virtual const vector<Group> readGroups() = 0;
 
 	virtual void writeGroup(const string &name) = 0;
 
-	virtual Articles readArticles(ID group) = 0;
+	virtual const vector<Article> readArticles(int group) = 0;
 
-	virtual void deleteArticle(ID group, ID article) = 0;
+	virtual void deleteArticle(int group, int article) = 0;
 
-	virtual void deleteGroup(ID group) = 0;
+	virtual void deleteGroup(int group) = 0;
 };
 
 #endif

@@ -34,7 +34,7 @@ public:
         Message ms = Message{};
         try
         {
-            switch (message.command)
+            switch (message.getCommand())
             {
             case Protocol::COM_LIST_NG:
             {

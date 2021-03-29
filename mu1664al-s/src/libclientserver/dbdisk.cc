@@ -4,15 +4,15 @@ DBDisk::~DBDisk()
 {
 }
 
-void DBDisk::writeArticle(ID group, const Article &article)
+void DBDisk::writeArticle(int group, const Article &article)
 {
 }
 
-Article DBDisk::readArticle(ID group, ID article)
+const Article DBDisk::readArticle(int group, int article)
 {
 }
 
-Groups DBDisk::readGroups()
+const vector<Group> DBDisk::readGroups()
 {
 }
 
@@ -20,14 +20,14 @@ void DBDisk::writeGroup(const string &name)
 {
 }
 
-Articles DBDisk::readArticles(ID group)
+const vector<Article> DBDisk::readArticles(int group)
 {
 }
 
-void DBDisk::deleteArticle(ID group, ID article)
+void DBDisk::deleteArticle(int group, int article)
 {
 }
 
-void DBDisk::deleteGroup(ID group)
+void DBDisk::deleteGroup(int group)
 {
 }

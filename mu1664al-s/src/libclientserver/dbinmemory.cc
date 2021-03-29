@@ -4,15 +4,15 @@ DBInMemory::~DBInMemory()
 {
 }
 
-void DBInMemory::writeArticle(ID group, const Article &article)
+void DBInMemory::writeArticle(int group, const Article &article)
 {
 }
 
-Article DBInMemory::readArticle(ID group, ID article)
+const Article DBInMemory::readArticle(int group, int article)
 {
 }
 
-Groups DBInMemory::readGroups()
+const vector<Group> DBInMemory::readGroups()
 {
 }
 
@@ -20,14 +20,14 @@ void DBInMemory::writeGroup(const string &name)
 {
 }
 
-Articles DBInMemory::readArticles(ID group)
+const vector<Article> DBInMemory::readArticles(int group)
 {
 }
 
-void DBInMemory::deleteArticle(ID group, ID article)
+void DBInMemory::deleteArticle(int group, int article)
 {
 }
 
-void DBInMemory::deleteGroup(ID group)
+void DBInMemory::deleteGroup(int group)
 {
 }
