@@ -48,7 +48,7 @@ Connection init(int argc, char *argv[])
     return conn;
 }
 
-void handleCommand(const MessageHandler &msh, int command)
+void handleCommand(shared_ptr<Connection> conn, int command)
 {
     // do the same for the rest of the commands
     switch (command)
@@ -58,13 +58,13 @@ void handleCommand(const MessageHandler &msh, int command)
         // guide user through input
         // generate params
         Message ms;
-        msh.send(ms);
+        MessageHandler::send(conn, ms);
         break;
     }
     default:
         break;
     }
-    Message ms = msh.recieve();
+    Message ms = MessageHandler::recieve(conn);
     if (ms.getStatus() == Protocol::ANS_ACK)
     {
         switch (ms.getCommand())
@@ -84,7 +84,7 @@ void handleCommand(const MessageHandler &msh, int command)
     }
 }
 
-int app(const MessageHandler &msh)
+int app(shared_ptr<Connection> conn)
 {
     // print the commands here
     cout << "Type a command (number): ";
@@ -94,7 +94,7 @@ int app(const MessageHandler &msh)
         cout << endl;
         try
         {
-            handleCommand(msh, command);
+            handleCommand(conn, command);
         }
         catch (ConnectionClosedException &)
         {
@@ -109,6 +109,5 @@ int app(const MessageHandler &msh)
 
 int main(int argc, char *argv[])
 {
-    MessageHandler msh = MessageHandler(make_shared<Connection>(init(argc, argv)));
-    return app(msh);
+    return app(make_shared<Connection>(init(argc, argv)));
 }

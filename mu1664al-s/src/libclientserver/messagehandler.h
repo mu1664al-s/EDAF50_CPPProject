@@ -13,18 +13,15 @@ class MessageHandler
 {
 public:
     ~MessageHandler(){};
-    MessageHandler(const shared_ptr<Connection> &conn) : conn(conn) {}
-
     // parse and handle messages. throws exception
     // Server requests are rejected iConnectionf there are no db provided
     // Response message is generated and returned
-    Message recieve() const;
-    void send(const Message &message) const;
+    static Message recieve(shared_ptr<Connection> conn);
+    static void send(shared_ptr<Connection> conn, const Message &message);
 
 private:
-    const shared_ptr<Connection> &conn;
-    string readPackage() const;
-    void writeString(const string &str) const;
+    static const string readPackage(shared_ptr<Connection> conn);
+    static void writeString(shared_ptr<Connection> conn, const string &str);
 };
 
 #endif

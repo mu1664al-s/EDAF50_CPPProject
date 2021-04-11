@@ -22,6 +22,7 @@ void DBDisk::writeGroup(const string &name)
 
 const vector<Article> DBDisk::readArticles(int group)
 {
+    return vector<Article>(); // placeholder
 }
 
 void DBDisk::deleteArticle(int group, int article)
