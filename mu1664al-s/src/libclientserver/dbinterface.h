@@ -12,25 +12,26 @@ using std::vector;
 
 struct Article
 {
-	const int id; // unique
-	const string name;
-	const string author;
-	const string title;
-	const string text;
+	int id; // unique
+	string name;
+	string author;
+	string title;
+	string text;
 };
 
 struct Group
 {
-	const int id;	   // unique
-	const string name; // unique
-	const vector<Article> articles;
+	int id;	   // unique
+	string name; // unique
+	vector<Article> articles;
 };
 
 enum class DBExceptionType
 {
 	GROUP_NOT_FOUND = 0,
-	GROUP_ALREADY_EXITS = 1,
-	ARTICLE_NOT_FOUND = 2
+	GROUP_ALREADY_EXISTS = 1,
+	ARTICLE_NOT_FOUND = 2,
+	ARTICLE_ALREADY_EXISTS = 3
 };
 
 struct DBException
@@ -42,21 +43,22 @@ struct DBException
 class DBInterface
 {
 public:
+
 	virtual ~DBInterface() = default;
 
-	virtual void writeArticle(int group, const Article &article) = 0;
+	virtual void writeArticle(int group, const Article &article) = 0; //write a new article to a newsgroup
 
-	virtual const Article readArticle(int group, int article) = 0;
+	virtual const Article readArticle(int group, int article) = 0; // read an article from a newsgroup, using group identity and article identity
 
 	virtual const vector<Group> readGroups() = 0;
 
-	virtual void writeGroup(const string &name) = 0;
+	virtual void writeGroup(const string& name) = 0; //
 
-	virtual const vector<Article> readArticles(int group) = 0;
+	virtual const vector<Article> readArticles(int group) = 0; // get articles from a newsgroup, using the group identity
 
-	virtual void deleteArticle(int group, int article) = 0;
+	virtual void deleteArticle(int group, int article) = 0; //delete an article, specified by its id in a newsgroup.
 
-	virtual void deleteGroup(int group) = 0;
+	virtual void deleteGroup(int group) = 0; //deletegroup, using the group identity.
 };
 
 #endif
