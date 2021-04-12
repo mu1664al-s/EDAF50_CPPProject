@@ -29,6 +29,90 @@ using std::stoi;
 class ServerBase
 {
 public:
+    void exec(shared_ptr<Connection> conn,
+              shared_ptr<DBInterface> database)
+    {
+        try
+        {
+            Message ms = Message();
+            const Message &message = MessageHandler::recieve(conn);
+            switch (message.getCommand())
+            {
+            case Protocol::COM_LIST_NG:
+            {
+                listGroups(database, ms);
+                break;
+            }
+            case Protocol::COM_LIST_ART:
+            {
+                listArticles(database, message, ms);
+                break;
+            }
+            case Protocol::COM_CREATE_NG:
+            {
+                createGroup(database, message, ms);
+                break;
+            }
+            case Protocol::COM_CREATE_ART:
+            {
+                createArticle(database, message, ms);
+                break;
+            }
+            case Protocol::COM_DELETE_NG:
+            {
+                deleteGroup(database, message, ms);
+                break;
+            }
+            case Protocol::COM_DELETE_ART:
+            {
+                deleteArticle(database, message, ms);
+                break;
+            }
+            case Protocol::COM_GET_ART:
+            {
+                getArticle(database, message, ms);
+                break;
+            }
+            default:
+                break;
+            }
+            MessageHandler::send(conn, ms);
+        }
+        catch (MessageException &)
+        {
+            cout << "ILLEGAL MESSAGE" << endl;
+        }
+    };
+
+    Server init(int argc, char *argv[])
+    {
+        if (argc != 2)
+        {
+            cerr << "Usage: myserver port-number" << endl;
+            exit(1);
+        }
+
+        int port = -1;
+        try
+        {
+            port = stoi(argv[1]);
+        }
+        catch (exception &e)
+        {
+            cerr << "Wrong format for port number. " << e.what() << endl;
+            exit(2);
+        }
+
+        Server server(port);
+        if (!server.isReady())
+        {
+            cerr << "Server initialization error." << endl;
+            exit(3);
+        }
+        return server;
+    }
+
+private:
     void listGroups(shared_ptr<DBInterface> database, Message &ms)
     {
         vector<Group> groups = database->readGroups();
@@ -157,89 +241,6 @@ public:
             }
             ms.setCommand(Protocol::ANS_GET_ART).setStatus(Protocol::ANS_NAK).setError(error);
         }
-    }
-
-    void exec(shared_ptr<Connection> conn,
-              shared_ptr<DBInterface> database)
-    {
-        try
-        {
-            Message ms = Message();
-            const Message &message = MessageHandler::recieve(conn);
-            switch (message.getCommand())
-            {
-            case Protocol::COM_LIST_NG:
-            {
-                listGroups(database, ms);
-                break;
-            }
-            case Protocol::COM_LIST_ART:
-            {
-                listArticles(database, message, ms);
-                break;
-            }
-            case Protocol::COM_CREATE_NG:
-            {
-                createGroup(database, message, ms);
-                break;
-            }
-            case Protocol::COM_CREATE_ART:
-            {
-                createArticle(database, message, ms);
-                break;
-            }
-            case Protocol::COM_DELETE_NG:
-            {
-                deleteGroup(database, message, ms);
-                break;
-            }
-            case Protocol::COM_DELETE_ART:
-            {
-                deleteArticle(database, message, ms);
-                break;
-            }
-            case Protocol::COM_GET_ART:
-            {
-                getArticle(database, message, ms);
-                break;
-            }
-            default:
-                break;
-            }
-            MessageHandler::send(conn, ms);
-        }
-        catch (MessageException &)
-        {
-            cout << "ILLEGAL MESSAGE" << endl;
-        }
-    };
-
-    Server init(int argc, char *argv[])
-    {
-        if (argc != 2)
-        {
-            cerr << "Usage: myserver port-number" << endl;
-            exit(1);
-        }
-
-        int port = -1;
-        try
-        {
-            port = stoi(argv[1]);
-        }
-        catch (exception &e)
-        {
-            cerr << "Wrong format for port number. " << e.what() << endl;
-            exit(2);
-        }
-
-        Server server(port);
-        if (!server.isReady())
-        {
-            cerr << "Server initialization error." << endl;
-            exit(3);
-        }
-        return server;
     }
 };
 
