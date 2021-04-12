@@ -44,9 +44,7 @@ public:
         try
         {
             int id = message.getParmaters()[0].N;
-            //cout << "id: " << id << endl;
             vector<Article> articles = database->readArticles(id);
-            //cout << "articles: " << articles.size() << endl;
             ms.setCommand(Protocol::ANS_LIST_ART).setStatus(Protocol::ANS_ACK).addNumParam(articles.size());
             for (Article a : articles)
             {
@@ -168,21 +166,6 @@ public:
         {
             Message ms = Message();
             const Message &message = MessageHandler::recieve(conn);
-            /*cout << "command: " << static_cast<int>(message.getCommand()) << endl;
-            vector<Parameter> params = message.getParmaters();
-            cout << "parameters (" << params.size() << "): " << endl;
-            for (Parameter param : params)
-            {
-                if (param.type == Protocol::PAR_NUM)
-                {
-                    cout << "num(" << param.N << ")" << endl;
-                }
-                if (param.type == Protocol::PAR_STRING)
-                {
-                    cout << "str(" << param.str << ")" << endl;
-                }
-            }
-            cout << "recieved messaged" << endl;*/
             switch (message.getCommand())
             {
             case Protocol::COM_LIST_NG:
