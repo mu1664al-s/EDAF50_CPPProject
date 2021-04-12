@@ -1,35 +1,56 @@
 #include "messagehandler.h"
+#include <iostream>
 
-Message MessageHandler::recieve() const
+Message MessageHandler::recieve(shared_ptr<Connection> conn)
 {
-    Message ms = Message(readPackage()); // decode
-    if (ms.getStatus() == Protocol::ANS_ACK || ms.getStatus() == Protocol::ANS_NAK)
-    {
-        return ms;
-    }
-    return Message{};
-}
-void MessageHandler::send(const Message &message) const
-{
-    writeString(message.encode());
+    return Message(readPackage(conn));
 }
 
-string MessageHandler::readPackage() const
+void MessageHandler::send(shared_ptr<Connection> conn, const Message &message)
 {
-    string s;
+    writeString(conn, message.encode());
+}
+
+const string MessageHandler::readPackage(shared_ptr<Connection> conn)
+{
+    string s = "";
     unsigned char ch;
-    while ((ch = conn->read()) != '$')
+    bool readingPackage = false;
+    while (true)
     {
-        s += ch;
+        ch = conn->read();
+        Protocol proto = static_cast<Protocol>(ch);
+        if (readingPackage)
+        {
+            s += ch;
+            // detect end and break loop
+            if (proto == Protocol::COM_END || proto == Protocol::ANS_END)
+            {
+                break;
+            }
+        }
+
+        // detect command and start buffering, break otherwise
+        if (s == "")
+        {
+            if ((proto > Protocol::UNDEFINED && proto < Protocol::COM_END) || (proto >= Protocol::ANS_LIST_NG && proto < Protocol::ANS_END))
+            {
+                s += ch;
+                readingPackage = true;
+            }
+            else
+            {
+                break;
+            }
+        }
     }
     return s;
 }
 
-void MessageHandler::writeString(const string &str) const
+void MessageHandler::writeString(shared_ptr<Connection> conn, const string &str)
 {
-    for (char c : str)
+    for (unsigned char c : str)
     {
         conn->write(c);
     }
-    conn->write('$');
 }

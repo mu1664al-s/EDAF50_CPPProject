@@ -1,13 +1,83 @@
 #include "message.h"
+#include <iostream>
 
 Message::Message(const string &package)
 {
     // decode and generate a message
+    parameters = vector<Parameter>{};
+    command = static_cast<Protocol>(package[0]);
+    int param_offset = 1;
+    if (command > Protocol::ANS_LIST_NG)
+    {
+        status = static_cast<Protocol>(package[param_offset]);
+        param_offset++;
+        if (status == Protocol::ANS_NAK)
+        {
+            error = static_cast<Protocol>(param_offset);
+            param_offset++;
+        }
+    }
+    // add the parameters
+    for (; param_offset < package.length() - 1;)
+    {
+        Protocol type = static_cast<Protocol>(package[param_offset]);
+        int N = decNum(package.substr(param_offset + 1, 4));
+        param_offset += 5;
+        string str = "";
+        if (type == Protocol::PAR_STRING)
+        {
+            str = package.substr(param_offset, N);
+            param_offset += N;
+        }
+        parameters.emplace_back(Parameter{type, N, str});
+    }
+}
+
+string Message::encodeParams() const
+{
+    string s = "";
+    int c = 0;
+    for (const Parameter &param : parameters)
+    {
+        s += static_cast<unsigned char>(param.type);
+        s += encNum(param.N);
+        s += param.str;
+    }
+    return s;
 }
 
 const string Message::encode() const
 {
-    // encode and generate message string
+    string s = "";
+    s += static_cast<unsigned char>(command);
+    if (command <= Protocol::ANS_LIST_NG) // response without status
+    {
+        s += encodeParams();
+    }
+    else
+    {
+        // handling response with status and error
+        s += static_cast<unsigned char>(status);
+        if (status == Protocol::ANS_NAK)
+        {
+            s += static_cast<unsigned char>(error);
+        }
+        else
+        {
+            s += encodeParams();
+        }
+    }
+
+    // add the end byte
+    if (command > Protocol::COM_END)
+    {
+        s += static_cast<unsigned char>(Protocol::ANS_END);
+    }
+    else
+    {
+        s += static_cast<unsigned char>(Protocol::COM_END);
+    }
+    return s;
 }
 
 int Message::decNum(const string &str) const
@@ -29,12 +99,14 @@ const string Message::encNum(int value) const
     return str;
 }
 
-void Message::addNumParam(int num)
+Message &Message::addNumParam(int num)
 {
     parameters.push_back(Parameter{Protocol::PAR_NUM, num, ""});
+    return *this;
 }
 
-void Message::addStrParam(const string &str)
+Message &Message::addStrParam(const string &str)
 {
-    parameters.push_back(Parameter{Protocol::PAR_STRING, 0, str});
+    parameters.push_back(Parameter{Protocol::PAR_STRING, static_cast<int>(str.length()), str});
+    return *this;
 }

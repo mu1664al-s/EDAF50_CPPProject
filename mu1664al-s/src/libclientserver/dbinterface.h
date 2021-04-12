@@ -13,16 +13,15 @@ using std::vector;
 struct Article
 {
 	int id; // unique
-	string name;
-	string author;
 	string title;
+	string author;
 	string text;
 };
 
 struct Group
 {
-	int id;	   // unique
-	string name; // unique
+	int id;		  // unique
+	string title; // unique
 	vector<Article> articles;
 };
 
@@ -43,7 +42,6 @@ struct DBException
 class DBInterface
 {
 public:
-
 	virtual ~DBInterface() = default;
 
 	virtual void writeArticle(int group, const Article &article) = 0; //write a new article to a newsgroup
@@ -52,7 +50,7 @@ public:
 
 	virtual const vector<Group> readGroups() = 0;
 
-	virtual void writeGroup(const string& name) = 0; //
+	virtual void writeGroup(const string &name) = 0; //
 
 	virtual const vector<Article> readArticles(int group) = 0; // get articles from a newsgroup, using the group identity
 

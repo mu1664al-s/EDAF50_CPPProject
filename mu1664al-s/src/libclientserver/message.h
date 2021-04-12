@@ -31,11 +31,23 @@ public:
     Message() = default;
     Message(const string &package); // parse and validate message package
     const string encode() const;
-    void addNumParam(int num);
-    void addStrParam(const string &str);
-    void setCommand(const Protocol &command) { this->command = command; };
-    void setStatus(const Protocol &status) { this->status = status; };
-    void setError(const Protocol &error) { this->error = error; };
+    Message &addNumParam(int num);
+    Message &addStrParam(const string &str);
+    Message &setCommand(const Protocol &command)
+    {
+        this->command = command;
+        return *this;
+    };
+    Message &setStatus(const Protocol &status)
+    {
+        this->status = status;
+        return *this;
+    };
+    Message &setError(const Protocol &error)
+    {
+        this->error = error;
+        return *this;
+    };
     const Protocol &getCommand() const { return command; };
     const Protocol &getStatus() const { return status; };
     const vector<Parameter> &getParmaters() const { return parameters; };
@@ -49,4 +61,5 @@ private:
 
     int decNum(const string &str) const;
     const string encNum(int num) const;
+    string encodeParams() const;
 };

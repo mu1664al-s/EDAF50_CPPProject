@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 {
     ServerBase base_server = ServerBase();
     Server server = base_server.init(argc, argv);
-    const DBInterface &db = DBDisk();
+    shared_ptr<DBInterface> db = make_shared<DBDisk>();
 
     while (true)
     {
@@ -17,9 +17,7 @@ int main(int argc, char *argv[])
         {
             try
             {
-                MessageHandler msh = MessageHandler(conn);
-                Message ms = msh.recieve();
-                base_server.exec(msh, db, ms);
+                base_server.exec(conn, db);
             }
             catch (ConnectionClosedException &)
             {
