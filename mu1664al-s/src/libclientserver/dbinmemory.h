@@ -22,7 +22,6 @@ public:
 
 private:
     vector<Group> groups;
-    int getsize();
 };
 
 #endif

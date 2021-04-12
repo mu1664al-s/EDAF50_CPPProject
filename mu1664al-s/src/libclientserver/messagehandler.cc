@@ -51,6 +51,10 @@ const string MessageHandler::readPackage(shared_ptr<Connection> conn)
                 s += ch;
                 readingPackage = true;
             }
+            else
+            {
+                break;
+            }
         }
     }
     return s;

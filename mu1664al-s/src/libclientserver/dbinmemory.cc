@@ -34,14 +34,14 @@ const Article DBInMemory::readArticle(int group, int article)
 
     if (it == groups.end())
     {
-        throw DBExceptionType::GROUP_NOT_FOUND;
+        throw DBException{DBExceptionType::GROUP_NOT_FOUND, " group not found"};
     }
     else
     {
         auto itart = find_if(it->articles.begin(), it->articles.end(), [article](const Article &a) { return a.id == article; });
         if (itart == it->articles.end())
         {
-            throw DBExceptionType::ARTICLE_NOT_FOUND;
+            throw DBException{DBExceptionType::ARTICLE_NOT_FOUND, " article not found"};
         }
         else
         {
@@ -76,7 +76,7 @@ const vector<Article> DBInMemory::readArticles(int group)
     auto it = find_if(groups.begin(), groups.end(), [group](const Group &g) { return g.id == group; });
     if (it == groups.end())
     {
-        throw DBExceptionType::GROUP_NOT_FOUND;
+        throw DBException{DBExceptionType::GROUP_NOT_FOUND, " group not found"};
     }
     else
     {
@@ -89,14 +89,14 @@ void DBInMemory::deleteArticle(int group, int article)
     auto it = find_if(groups.begin(), groups.end(), [group](const Group &g) { return g.id == group; });
     if (it == groups.end())
     {
-        throw DBExceptionType::GROUP_NOT_FOUND;
+        throw DBException{DBExceptionType::GROUP_NOT_FOUND, " group not found"};
     }
     else
     {
         auto itart = find_if(it->articles.begin(), it->articles.end(), [article](const Article &a) { return a.id == article; });
         if (itart == it->articles.end())
         {
-            throw DBExceptionType::ARTICLE_NOT_FOUND;
+            throw DBException{DBExceptionType::ARTICLE_NOT_FOUND, " article not found"};
         }
         else
         {
@@ -110,14 +110,10 @@ void DBInMemory::deleteGroup(int group)
     auto it = find_if(groups.begin(), groups.end(), [group](const Group &g) { return g.id == group; });
     if (it == groups.end())
     {
-        throw DBExceptionType::GROUP_NOT_FOUND;
+        throw DBException{DBExceptionType::GROUP_NOT_FOUND, " group not found"};
     }
     else
     {
         groups.erase(it);
     }
-}
-int DBInMemory::getsize()
-{
-    return groups.size();
 }
