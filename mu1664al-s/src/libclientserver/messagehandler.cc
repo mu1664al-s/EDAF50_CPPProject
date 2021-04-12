@@ -30,17 +30,13 @@ const string MessageHandler::readPackage(shared_ptr<Connection> conn)
             }
         }
 
-        // detect command and start buffering, break otherwise
+        // detect command and start buffering
         if (s == "")
         {
             if ((proto > Protocol::UNDEFINED && proto < Protocol::COM_END) || (proto >= Protocol::ANS_LIST_NG && proto < Protocol::ANS_END))
             {
                 s += ch;
                 readingPackage = true;
-            }
-            else
-            {
-                break;
             }
         }
     }
