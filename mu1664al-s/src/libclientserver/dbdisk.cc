@@ -7,8 +7,9 @@
 #include<vector>
 #include<algorithm>
 #include<stdio.h>
+#include<regex>
 using namespace std;
-string path = "/mnt/c/Users/bitmill/Desktop/Vu/EDAF50_CPPProject/mu1664al-s/src/libclientserver/database/";
+string path = "/mnt/c/Users/co7647ng/Program/VisualStudioProjects/C++Course/Project/EDAF50_CPPProject/mu1664al-s/src/libclientserver/database/";
 DBDisk::DBDisk()
 {
 ifstream infile;
@@ -61,7 +62,9 @@ void DBDisk::writeArticle(int group, const Article &article)
           outfile << 1 << "<>" << article.name << endl; 
           ofstream outfile1;
           outfile1.open(path + "g" +to_string(group) + "a" + to_string(1) + ".txt"); //create new gidaid.txt;
-          outfile1 << 1 <<endl<< article.name << endl << article.author << endl << article.title << endl<< article.text << endl; 
+		  string text;
+		  text = regex_replace(article.text, regex("\n"), "\\n" );
+          outfile1 << 1 <<endl<< article.name << endl << article.author << endl << article.title << endl<< text << endl; 
       }
       else // if the group is not empty, check the existed article names.
       {
@@ -78,7 +81,9 @@ void DBDisk::writeArticle(int group, const Article &article)
           outfile << newid << "<>" << article.name << endl;
           ofstream outfile1; 
           outfile1.open(path + "g" +to_string(group) + "a" + to_string(newid) + ".txt");
-          outfile1 <<newid << endl <<article.name << endl << article.author << endl << article.title << endl << article.text << endl; 
+		  string text;
+		  text = regex_replace(article.text, regex("\n"), "\\n");
+          outfile1 <<newid << endl <<article.name << endl << article.author << endl << article.title << endl << text << endl; 
         }
 
       }
@@ -128,7 +133,7 @@ const Article DBDisk::readArticle(int group, int article)
       getline(infile1,title);
       getline(infile1,text);
     
-      //infile1 >>id >> name >> author >> title >> text; this is not working in case there are whitespace somewhere
+	  text = regex_replace(text, regex("\\\\n"), "\n");
       Article res{id,name,author,title,text};
       return res;
   }
