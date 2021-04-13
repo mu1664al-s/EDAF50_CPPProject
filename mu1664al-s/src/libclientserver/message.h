@@ -36,6 +36,11 @@ public:
     Message &setCommand(const Protocol &command)
     {
         this->command = command;
+        end = Protocol::ANS_END;
+        if (command < Protocol::COM_END)
+        {
+            end = Protocol::COM_END;
+        }
         return *this;
     };
     Message &setStatus(const Protocol &status)
@@ -54,10 +59,11 @@ public:
     const Protocol &getError() const { return error; };
 
 private:
-    Protocol command;
-    Protocol status;
-    Protocol error;
-    vector<Parameter> parameters;
+    Protocol command = Protocol::UNDEFINED;
+    Protocol status = Protocol::UNDEFINED;
+    Protocol error = Protocol::UNDEFINED;
+    Protocol end = Protocol::UNDEFINED;
+    vector<Parameter> parameters{};
 
     int decNum(const string &str) const;
     const string encNum(int num) const;

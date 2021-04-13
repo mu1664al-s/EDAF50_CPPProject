@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include <string>
 #include <memory>
+#include <ios>
+#include <limits>
 
 using std::cerr;
 using std::cin;
@@ -62,7 +64,9 @@ void print_commands()
          << "\t";
     cout << "6. Delete article"
          << "\t";
-    cout << "7. Get article" << endl;
+    cout << "7. Get article"
+         << "\t";
+    cout << "8. Exit" << endl;
 }
 
 void listGroups(Message &ms)
@@ -73,22 +77,30 @@ void listGroups(Message &ms)
 
 void ansListGroups(const Message &ms)
 {
-    const vector<Parameter> &params = ms.getParmaters();
-    if (params[0].N > 0)
+    try
     {
-        cout << ">>";
-        for (int i = 1; i < params.size();)
+        const vector<Parameter> &params = ms.getParmaters();
+        if (params[0].N > 0)
         {
-            cout << params[i].N << ". ";
-            cout << params[i + 1].str << "\t";
-            i += 2;
+            cout << ">>";
+            for (int i = 1; i < params.size();)
+            {
+                cout << params[i].N << ". ";
+                cout << params[i + 1].str << "\t";
+                i += 2;
+            }
         }
+        else
+        {
+            cout << ">>No news groups found!";
+        }
+        cout << endl;
     }
-    else
+    catch (exception &e)
     {
-        cout << ">>No news groups found!";
+        cerr << e.what() << endl;
+        throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE};
     }
-    cout << endl;
 }
 
 void listArticles(Message &ms)
@@ -116,9 +128,13 @@ void ansCreateGroup(const Message &ms)
     {
         cout << ">>News group created." << endl;
     }
-    else
+    else if (ms.getStatus() == Protocol::ANS_NAK)
     {
         cout << ">>Error! News group alredy exists." << endl;
+    }
+    else
+    {
+        throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE};
     }
 }
 
@@ -164,6 +180,20 @@ void ansGetArticle(const Message &ms)
 
 void handleCommand(shared_ptr<Connection> conn, int command)
 {
+    if (command == 8)
+    {
+        cout << endl;
+        cout << ">>Exiting..." << endl;
+        exit(0);
+    }
+    if (command == 0)
+    {
+        cout << endl;
+        cout << ">>Error! Please input a number between 1 and 8." << endl;
+        cin.clear();
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        return;
+    }
     Message ms = Message();
     // guide the user through the process of sending these commands
     switch (static_cast<Protocol>(command))
@@ -204,51 +234,61 @@ void handleCommand(shared_ptr<Connection> conn, int command)
         break;
     }
     default:
-        break;
+        cout << endl;
+        cout << ">>Invalid command (" << command << ")!" << endl;
+        return;
     }
     MessageHandler::send(conn, ms);
-    ms = MessageHandler::recieve(conn);
+    try
+    {
+        ms = MessageHandler::recieve(conn);
 
-    // handle the response
-    switch (ms.getCommand())
-    {
-    case Protocol::ANS_LIST_NG:
-    {
-        ansListGroups(ms);
-        break;
+        // handle the response
+        switch (ms.getCommand())
+        {
+        case Protocol::ANS_LIST_NG:
+        {
+            ansListGroups(ms);
+            break;
+        }
+        case Protocol::ANS_LIST_ART:
+        {
+            ansListArticles(ms);
+            break;
+        }
+        case Protocol::ANS_CREATE_NG:
+        {
+            ansCreateGroup(ms);
+            break;
+        }
+        case Protocol::ANS_CREATE_ART:
+        {
+            ansCreateArticle(ms);
+            break;
+        }
+        case Protocol::ANS_DELETE_NG:
+        {
+            ansDeleteGroup(ms);
+            break;
+        }
+        case Protocol::ANS_DELETE_ART:
+        {
+            ansDeleteArticle(ms);
+            break;
+        }
+        case Protocol::ANS_GET_ART:
+        {
+            ansGetArticle(ms);
+            break;
+        }
+        default:
+            break;
+        }
     }
-    case Protocol::ANS_LIST_ART:
+    catch (MessageException &)
     {
-        ansListArticles(ms);
-        break;
-    }
-    case Protocol::ANS_CREATE_NG:
-    {
-        ansCreateGroup(ms);
-        break;
-    }
-    case Protocol::ANS_CREATE_ART:
-    {
-        ansCreateArticle(ms);
-        break;
-    }
-    case Protocol::ANS_DELETE_NG:
-    {
-        ansDeleteGroup(ms);
-        break;
-    }
-    case Protocol::ANS_DELETE_ART:
-    {
-        ansDeleteArticle(ms);
-        break;
-    }
-    case Protocol::ANS_GET_ART:
-    {
-        ansGetArticle(ms);
-        break;
-    }
-    default:
-        break;
+        cout << ">>Recieved ILLEGAL MESSAGE!" << endl;
+        cout << endl;
     }
 }
 
@@ -258,8 +298,9 @@ int app(shared_ptr<Connection> conn)
     int command;
     print_commands();
     cout << "Type a command (number): ";
-    while (cin >> command)
+    while (true)
     {
+        cin >> command;
         try
         {
             handleCommand(conn, command);
