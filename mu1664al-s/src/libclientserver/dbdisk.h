@@ -1,13 +1,15 @@
 #ifndef DB_DISK_H
 #define DB_DISK_H
-
+#include<string>
+#include<vector>
+#include<fstream>
 #include "dbinterface.h"
 
 class DBDisk : public DBInterface
 {
 public:
     ~DBDisk();
-    DBDisk() = default;
+    DBDisk();
     virtual void writeArticle(int group, const Article &article);
 
     virtual const Article readArticle(int group, int article);
@@ -21,6 +23,11 @@ public:
     virtual void deleteArticle(int group, int article);
 
     virtual void deleteGroup(int group);
+    void getids();
+    void getnames();
+private:
+    vector<int> groupids;
+    vector<string> groupnames;
 };
 
 #endif
