@@ -142,7 +142,21 @@ const Article DBDisk::readArticle(int group, int article)
 
 const vector<Group> DBDisk::readGroups()
 {
-   
+	vector<Group> groups;
+	if (groupids.size() == 0)
+	{
+		cout << "GROUP_NOT_FOUND";
+	}
+	else
+	{
+		for (int i = 0; i < groupids.size(); i++)
+		{	
+			vector<Article> articles = readArticles(groupids[i]);
+			Group group{groupids[i],groupnames[i],articles};
+			groups.push_back(group);
+		}
+	}
+	return groups;
 }
 
 void DBDisk::writeGroup(const string &name)

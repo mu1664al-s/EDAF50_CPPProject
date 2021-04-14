@@ -9,12 +9,19 @@ void printArticle(const Article& article)
 {
     cout << "ID:" << article.id << endl << "Name:" << article.name << endl << "Author:" <<article.author << endl << "Title:" << article.title << endl << "Text:" << article.text <<endl;
 }
-void printArticles(const vector<Article> articles)
+void printArticles(const vector<Article>& articles)
 {
     for(auto it = articles.begin();it!= articles.end(); it++)
     {
         printArticle(*it);
     }
+}
+void printGroups(const vector<Group>& groups)
+{
+	for (auto it = groups.begin(); it != groups.end(); it++)
+	{
+		cout << (*it).id << "<>" << (*it).name << endl;
+	}
 }
 int main()
 {
@@ -40,13 +47,18 @@ int main()
     
     //comment the first test and uncomment the second test;
     
-    /*cout << "Test readArticle and readArticles" << endl;
+    /*cout << "Test readArticle and readArticles and readGroups" << endl;
     auto testreadArticle = mydb.readArticle(2,2);
     cout << "The article with id 2 in the group with id 2 (expected article3)" << endl;
     printArticle(testreadArticle);
     cout << "Print all the articles in group with id 3 (expected article 4 and article 5)" << endl;
     auto testreadArticles = mydb.readArticles(3);
-    printArticles(testreadArticles);*/
+    printArticles(testreadArticles);
+	auto testreadgroups = mydb.readGroups();
+	cout << "Test reading all groups: by printing out their ids and names: (?)" << endl;
+	printGroups(testreadgroups);
+	*/
+
     //test ends here.
 
     //comment all of the above and uncomment the last test; NB: CHECK THE newsgroup.txt and all the article document to see the change in the database. article document and group info will be removed.
