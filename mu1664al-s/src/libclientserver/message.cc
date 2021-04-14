@@ -5,7 +5,7 @@ Message::Message(const string &package)
 {
     // decode and generate a message
     command = static_cast<Protocol>(package[0]);
-    int param_offset = 1;
+    size_t param_offset = 1;
     if (command > Protocol::ANS_LIST_NG)
     {
         // handle status
@@ -36,7 +36,6 @@ Message::Message(const string &package)
 string Message::encodeParams() const
 {
     string s = "";
-    int c = 0;
     for (const Parameter &param : parameters)
     {
         s += static_cast<unsigned char>(param.type);

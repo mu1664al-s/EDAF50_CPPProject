@@ -24,7 +24,7 @@ void DBInMemory::writeArticle(int group, const Article &article)
             newarticleid = it->articles.back().id + 1;
         }
         Article newarticle{newarticleid, article.title, article.author, article.text};
-        it->articles.emplace_back(newarticle);
+        it->articles.push_back(newarticle);
     }
 }
 
