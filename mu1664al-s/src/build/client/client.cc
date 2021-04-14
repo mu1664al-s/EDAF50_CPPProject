@@ -87,7 +87,7 @@ void ansListGroups(const Message &ms)
             {
                 cout << params[i].N << ". ";
                 cout << params[i + 1].str << "\t";
-                i += 2;
+                i+=2;
             }
         }
         else
@@ -106,11 +106,54 @@ void ansListGroups(const Message &ms)
 void listArticles(Message &ms)
 {
     // guided process
+    int id;
+    cout << "ID of the news group: ";
+    cin >> id;
+    ms.setCommand(Protocol::COM_LIST_ART).addNumParam(id);
+    cout << endl;
+
 }
 
 void ansListArticles(const Message &ms)
 {
     // print response
+    try
+    {
+        if(ms.getStatus()==Protocol::ANS_ACK)
+        {
+        const vector<Parameter> &params = ms.getParmaters();
+        if (params[0].N > 0)
+        {
+            cout << ">>";
+            for (int i = 1; i < params.size();)
+            {
+                cout << params[i].N << ". ";
+                cout << params[i + 1].str << "\t";
+                i+=2;
+            }
+        }
+        else
+        {
+            cout << ">>No news groups found!";
+        }
+        }
+       else if (ms.getStatus() == Protocol::ANS_NAK)
+        {
+            cout << ">>Error! News group alredy exists." << endl;
+        }
+        else
+        {
+            throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE};
+        }
+        
+        cout << endl;
+    }
+    catch (exception &e)
+    {
+        cerr << e.what() << endl;
+        throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE};
+    }
+
 }
 
 void createGroup(Message &ms)
@@ -141,21 +184,52 @@ void ansCreateGroup(const Message &ms)
 void createArticle(Message &ms)
 {
     // guided process
+    ms.setCommand(Protocol::COM_CREATE_ART).addStrParam("Anything").addStrParam("Amir").addStrParam("text");
+    cout << endl;
 }
 
 void ansCreateArticle(const Message &ms)
 {
     // print response
+    if (ms.getStatus() == Protocol::ANS_ACK)
+    {
+        cout << ">>Article Created." << endl;
+    }
+    else if (ms.getStatus() == Protocol::ANS_NAK)
+    {
+        cout << ">>Error! News group not found." << endl;
+    }
+    else
+    {
+        throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE};
+    }
 }
 
 void deleteGroup(Message &ms)
 {
     // guided process
+    int id;
+    cout << "ID of the news group: ";
+    cin >> id;
+    ms.setCommand(Protocol::COM_DELETE_NG).addNumParam(id);
+    cout << endl;
 }
 
 void ansDeleteGroup(const Message &ms)
 {
     // print response
+     if (ms.getStatus() == Protocol::ANS_ACK)
+    {
+        cout << ">>News group deleted." << endl;
+    }
+    else if (ms.getStatus() == Protocol::ANS_NAK)
+    {
+        cout << ">>Error! News group not found." << endl;
+    }
+    else
+    {
+        throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE};
+    }
 }
 
 void deleteArticle(Message &ms)
@@ -220,6 +294,7 @@ void handleCommand(shared_ptr<Connection> conn, int command)
     }
     case Protocol::COM_DELETE_NG:
     {
+        cout << "delete" << endl;
         deleteGroup(ms);
         break;
     }
