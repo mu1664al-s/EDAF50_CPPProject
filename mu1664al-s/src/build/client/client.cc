@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include <string>
 #include <memory>
+#include <ios>
+#include <limits>
 
 using std::cerr;
 using std::cin;
@@ -62,7 +64,9 @@ void print_commands()
          << "\t";
     cout << "6. Delete article"
          << "\t";
-    cout << "7. Get article" << endl;
+    cout << "7. Get article"
+         << "\t";
+    cout << "8. Exit" << endl;
 }
 
 void listGroups(Message &ms)
@@ -73,32 +77,81 @@ void listGroups(Message &ms)
 
 void ansListGroups(const Message &ms)
 {
-    const vector<Parameter> &params = ms.getParmaters();
-    if (params[0].N > 0)
+    try
     {
-        cout << ">>";
-        for (int i = 1; i < params.size();)
+        const vector<Parameter> &params = ms.getParmaters();
+        if (params[0].N > 0)
         {
-            cout << params[i].N << ". ";
-            cout << params[i + 1].str << "\t";
-            i += 2;
+            cout << ">>";
+            for (size_t i = 1; i < params.size();)
+            {
+                cout << params[i].N << ". ";
+                cout << params[i + 1].str << "\t";
+                i += 2;
+            }
         }
+        else
+        {
+            cout << ">>No news groups found!";
+        }
+        cout << endl;
     }
-    else
+    catch (exception &e)
     {
-        cout << ">>No news groups found!";
+        cerr << e.what() << endl;
+        throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE, ""};
     }
-    cout << endl;
 }
 
 void listArticles(Message &ms)
 {
     // guided process
+    int id;
+    cout << "ID of the news group: ";
+    cin >> id;
+    ms.setCommand(Protocol::COM_LIST_ART).addNumParam(id);
+    cout << endl;
 }
 
 void ansListArticles(const Message &ms)
 {
     // print response
+    try
+    {
+        if (ms.getStatus() == Protocol::ANS_ACK)
+        {
+            const vector<Parameter> &params = ms.getParmaters();
+            if (params[0].N > 0)
+            {
+                cout << ">>";
+                for (size_t i = 1; i < params.size();)
+                {
+                    cout << params[i].N << ". ";
+                    cout << params[i + 1].str << "\t";
+                    i += 2;
+                }
+            }
+            else
+            {
+                cout << ">>No articles found!";
+            }
+        }
+        else if (ms.getStatus() == Protocol::ANS_NAK)
+        {
+            cout << ">>Error! News group alredy exists." << endl;
+        }
+        else
+        {
+            throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE, ""};
+        }
+
+        cout << endl;
+    }
+    catch (exception &e)
+    {
+        cerr << e.what() << endl;
+        throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE, ""};
+    }
 }
 
 void createGroup(Message &ms)
@@ -116,54 +169,184 @@ void ansCreateGroup(const Message &ms)
     {
         cout << ">>News group created." << endl;
     }
-    else
+    else if (ms.getStatus() == Protocol::ANS_NAK)
     {
         cout << ">>Error! News group alredy exists." << endl;
+    }
+    else
+    {
+        throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE, ""};
     }
 }
 
 void createArticle(Message &ms)
 {
     // guided process
+    int id;
+    cout << "ID of the news group: ";
+    cin >> id;
+    string title;
+    cout << "Title: ";
+    cin >> title;
+    string author;
+    cout << "Author: ";
+    cin >> author;
+    string text;
+    cout << "Text: ";
+    cin >> text;
+    ms.setCommand(Protocol::COM_CREATE_ART).addNumParam(id).addStrParam(title).addStrParam(author).addStrParam(text);
+    cout << endl;
 }
 
 void ansCreateArticle(const Message &ms)
 {
     // print response
+    if (ms.getStatus() == Protocol::ANS_ACK)
+    {
+        cout << ">>Article Created." << endl;
+    }
+    else if (ms.getStatus() == Protocol::ANS_NAK)
+    {
+        cout << ">>Error! News group not found." << endl;
+    }
+    else
+    {
+        throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE, ""};
+    }
 }
 
 void deleteGroup(Message &ms)
 {
     // guided process
+    int id;
+    cout << "ID of the news group: ";
+    cin >> id;
+    ms.setCommand(Protocol::COM_DELETE_NG).addNumParam(id);
+    cout << endl;
 }
 
 void ansDeleteGroup(const Message &ms)
 {
     // print response
+    if (ms.getStatus() == Protocol::ANS_ACK)
+    {
+        cout << ">>News group deleted." << endl;
+    }
+    else if (ms.getStatus() == Protocol::ANS_NAK)
+    {
+        cout << ">>Error! News group not found." << endl;
+    }
+    else
+    {
+        throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE, ""};
+    }
 }
 
 void deleteArticle(Message &ms)
 {
     // guided process
+    int group_id;
+    cout << "ID of the news group: ";
+    cin >> group_id;
+    int article_id;
+    cout << "ID of the article: ";
+    cin >> article_id;
+    ms.setCommand(Protocol::COM_DELETE_ART).addNumParam(group_id).addNumParam(article_id);
+    cout << endl;
 }
 
 void ansDeleteArticle(const Message &ms)
 {
     // print response
+    if (ms.getStatus() == Protocol::ANS_ACK)
+    {
+        cout << ">>Article deleted." << endl;
+    }
+    else if (ms.getStatus() == Protocol::ANS_NAK)
+    {
+        if (ms.getError() == Protocol::ERR_NG_DOES_NOT_EXIST)
+        {
+            cout << ">>Error! News group not found." << endl;
+        }
+        else if (ms.getError() == Protocol::ERR_NG_DOES_NOT_EXIST)
+        {
+            cout << ">>Error! Article not found." << endl;
+        }
+    }
+    else
+    {
+        throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE, ""};
+    }
 }
 
 void getArticle(Message &ms)
 {
     // guided process
+    int group_id;
+    cout << "ID of the news group: ";
+    cin >> group_id;
+    int article_id;
+    cout << "ID of the article: ";
+    cin >> article_id;
+    ms.setCommand(Protocol::COM_GET_ART).addNumParam(group_id).addNumParam(article_id);
+    cout << endl;
 }
 
 void ansGetArticle(const Message &ms)
 {
     // print response
+    if (ms.getStatus() == Protocol::ANS_ACK)
+    {
+        try
+        {
+            const vector<Parameter> &params = ms.getParmaters();
+            string title = params[0].str;
+            cout << ">>Title: " << title << endl;
+            string author = params[1].str;
+            cout << ">>Author: " << title << endl;
+            string text = params[2].str;
+            cout << ">>Text: " << endl;
+            cout << text << endl;
+        }
+        catch (exception &e)
+        {
+            cerr << e.what() << endl;
+            throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE, ""};
+        }
+    }
+    else if (ms.getStatus() == Protocol::ANS_NAK)
+    {
+        if (ms.getError() == Protocol::ERR_NG_DOES_NOT_EXIST)
+        {
+            cout << ">>Error! News group not found." << endl;
+        }
+        else if (ms.getError() == Protocol::ERR_NG_DOES_NOT_EXIST)
+        {
+            cout << ">>Error! Article not found." << endl;
+        }
+    }
+    else
+    {
+        throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE, ""};
+    }
 }
 
 void handleCommand(shared_ptr<Connection> conn, int command)
 {
+    if (command == 8)
+    {
+        cout << endl;
+        cout << ">>Exiting..." << endl;
+        exit(0);
+    }
+    if (command == 0)
+    {
+        cout << endl;
+        cout << ">>Error! Please input a number between 1 and 8." << endl;
+        cin.clear();
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        return;
+    }
     Message ms = Message();
     // guide the user through the process of sending these commands
     switch (static_cast<Protocol>(command))
@@ -190,6 +373,7 @@ void handleCommand(shared_ptr<Connection> conn, int command)
     }
     case Protocol::COM_DELETE_NG:
     {
+        cout << "delete" << endl;
         deleteGroup(ms);
         break;
     }
@@ -204,51 +388,61 @@ void handleCommand(shared_ptr<Connection> conn, int command)
         break;
     }
     default:
-        break;
+        cout << endl;
+        cout << ">>Invalid command (" << command << ")!" << endl;
+        return;
     }
     MessageHandler::send(conn, ms);
-    ms = MessageHandler::recieve(conn);
+    try
+    {
+        ms = MessageHandler::recieve(conn);
 
-    // handle the response
-    switch (ms.getCommand())
-    {
-    case Protocol::ANS_LIST_NG:
-    {
-        ansListGroups(ms);
-        break;
+        // handle the response
+        switch (ms.getCommand())
+        {
+        case Protocol::ANS_LIST_NG:
+        {
+            ansListGroups(ms);
+            break;
+        }
+        case Protocol::ANS_LIST_ART:
+        {
+            ansListArticles(ms);
+            break;
+        }
+        case Protocol::ANS_CREATE_NG:
+        {
+            ansCreateGroup(ms);
+            break;
+        }
+        case Protocol::ANS_CREATE_ART:
+        {
+            ansCreateArticle(ms);
+            break;
+        }
+        case Protocol::ANS_DELETE_NG:
+        {
+            ansDeleteGroup(ms);
+            break;
+        }
+        case Protocol::ANS_DELETE_ART:
+        {
+            ansDeleteArticle(ms);
+            break;
+        }
+        case Protocol::ANS_GET_ART:
+        {
+            ansGetArticle(ms);
+            break;
+        }
+        default:
+            break;
+        }
     }
-    case Protocol::ANS_LIST_ART:
+    catch (MessageException &)
     {
-        ansListArticles(ms);
-        break;
-    }
-    case Protocol::ANS_CREATE_NG:
-    {
-        ansCreateGroup(ms);
-        break;
-    }
-    case Protocol::ANS_CREATE_ART:
-    {
-        ansCreateArticle(ms);
-        break;
-    }
-    case Protocol::ANS_DELETE_NG:
-    {
-        ansDeleteGroup(ms);
-        break;
-    }
-    case Protocol::ANS_DELETE_ART:
-    {
-        ansDeleteArticle(ms);
-        break;
-    }
-    case Protocol::ANS_GET_ART:
-    {
-        ansGetArticle(ms);
-        break;
-    }
-    default:
-        break;
+        cout << ">>Recieved ILLEGAL MESSAGE!" << endl;
+        cout << endl;
     }
 }
 
@@ -258,8 +452,9 @@ int app(shared_ptr<Connection> conn)
     int command;
     print_commands();
     cout << "Type a command (number): ";
-    while (cin >> command)
+    while (true)
     {
+        cin >> command;
         try
         {
             handleCommand(conn, command);

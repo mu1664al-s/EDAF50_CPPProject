@@ -4,11 +4,11 @@
 Message::Message(const string &package)
 {
     // decode and generate a message
-    parameters = vector<Parameter>{};
     command = static_cast<Protocol>(package[0]);
-    int param_offset = 1;
+    size_t param_offset = 1;
     if (command > Protocol::ANS_LIST_NG)
     {
+        // handle status
         status = static_cast<Protocol>(package[param_offset]);
         param_offset++;
         if (status == Protocol::ANS_NAK)
@@ -36,7 +36,6 @@ Message::Message(const string &package)
 string Message::encodeParams() const
 {
     string s = "";
-    int c = 0;
     for (const Parameter &param : parameters)
     {
         s += static_cast<unsigned char>(param.type);
@@ -50,33 +49,19 @@ const string Message::encode() const
 {
     string s = "";
     s += static_cast<unsigned char>(command);
-    if (command <= Protocol::ANS_LIST_NG) // response without status
+    // handle status
+    if (status != Protocol::UNDEFINED)
     {
-        s += encodeParams();
-    }
-    else
-    {
-        // handling response with status and error
         s += static_cast<unsigned char>(status);
         if (status == Protocol::ANS_NAK)
         {
             s += static_cast<unsigned char>(error);
         }
-        else
-        {
-            s += encodeParams();
-        }
     }
-
+    // add parameters
+    s += encodeParams();
     // add the end byte
-    if (command > Protocol::COM_END)
-    {
-        s += static_cast<unsigned char>(Protocol::ANS_END);
-    }
-    else
-    {
-        s += static_cast<unsigned char>(Protocol::COM_END);
-    }
+    s += static_cast<unsigned char>(end);
     return s;
 }
 
