@@ -12,7 +12,7 @@ clean:
 
 distclean:
 	make -C src distclean
-	rm -rf bin/*
+	rm -rf ./bin/*
 	rm -rf ./database
 
 install:
