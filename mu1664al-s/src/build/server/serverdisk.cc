@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 {
     ServerBase base_server = ServerBase();
     Server server = base_server.init(argc, argv);
-    shared_ptr<DBInterface> db = make_shared<DBDisk>();
+    shared_ptr<DBInterface> db = make_shared<DBDisk>("../database/");
 
     while (true)
     {

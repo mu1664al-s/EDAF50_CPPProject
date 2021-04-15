@@ -13,12 +13,12 @@ class DBDisk : public DBInterface
 {
 public:
     ~DBDisk();
-    DBDisk();
+    DBDisk(const string &fs_root);
     virtual void writeArticle(int group, const Article &article);
 
     virtual const Article readArticle(int group, int article);
 
-    virtual const vector<Group> readGroups();
+    virtual const vector<Group> &readGroups();
 
     virtual void writeGroup(const string &name);
 
@@ -31,6 +31,7 @@ public:
     void getnames();
 
 private:
+    string fs_root;
     vector<Group> groups;
     vector<Group>::iterator checkRegister(int group);
     pair<int, string> readPair(const string &line, bool escape = false) const;

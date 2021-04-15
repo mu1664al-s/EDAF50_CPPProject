@@ -1,5 +1,6 @@
 all:
 	make -C src
+	mkdir -p ./database
 
 # Phony targets
 .PHONY: all clean distclean install
@@ -7,10 +8,14 @@ all:
 # Standard clean
 clean:
 	make -C src clean
+	rm -rf ./database/*
 
 distclean:
 	make -C src distclean
-	rm bin/* bin/.keep
+	rm -rf bin/*
+	rm -rf ./database
 
 install:
 	make -C src install
+	rm -rf ./database
+	mkdir ./database

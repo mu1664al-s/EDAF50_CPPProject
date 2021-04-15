@@ -48,7 +48,7 @@ public:
 
 	virtual const Article readArticle(int group, int article) = 0; // read an article from a newsgroup, using group identity and article identity
 
-	virtual const vector<Group> readGroups() = 0;
+	virtual const vector<Group> &readGroups() = 0;
 
 	virtual void writeGroup(const string &name) = 0; //
 
