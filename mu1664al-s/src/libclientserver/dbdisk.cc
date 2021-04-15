@@ -9,13 +9,13 @@
 #include <stdio.h>
 #include <regex>
 using namespace std;
-string path = "/home/sandbox/git/EDAF50_CPPProject/mu1664al-s/src/libclientserver/database/";
-DBDisk::DBDisk()
+DBDisk::DBDisk(const string &fs_root)
 {
+    this->fs_root = fs_root;
     ifstream in_register;
     pair<int, string> pair;
     string line;
-    in_register.open(path + "newsgroup.txt", fstream::out | fstream::in);
+    in_register.open(fs_root + "newsgroup.txt", fstream::out | fstream::in);
     while (getline(in_register, line))
     {
         pair = readPair(line, true);
@@ -33,7 +33,7 @@ void DBDisk::writeArticle(int group, const Article &article)
     checkRegister(group);
 
     ifstream in_group;
-    in_group.open(path + "g" + to_string(group) + ".txt", fstream::in);
+    in_group.open(fs_root + "g" + to_string(group) + ".txt", fstream::in);
     string line;
     pair<int, string> pair;
     while (getline(in_group, line))
@@ -55,13 +55,13 @@ void DBDisk::writeArticle(int group, const Article &article)
 
     //adding article to group
     ofstream out_group;
-    out_group.open(path + "g" + to_string(group) + ".txt", fstream::app | fstream::out);
+    out_group.open(fs_root + "g" + to_string(group) + ".txt", fstream::app | fstream::out);
     out_group << next_id << "<>" << title << endl;
     ofstream out_article;
     out_group.close();
 
     //writing the article to file
-    out_article.open(path + "g" + to_string(group) + "a" + to_string(next_id) + ".txt", fstream::out);
+    out_article.open(fs_root + "g" + to_string(group) + "a" + to_string(next_id) + ".txt", fstream::out);
     out_article << author << endl
                 << text << endl;
     out_article.close();
@@ -74,7 +74,7 @@ const Article DBDisk::readArticle(int group, int article)
 
     // check the group
     ifstream in_group;
-    in_group.open(path + "g" + to_string(group) + ".txt", fstream::in);
+    in_group.open(fs_root + "g" + to_string(group) + ".txt", fstream::in);
     string line;
     pair<int, string> pair;
     bool article_found = false;
@@ -97,7 +97,7 @@ const Article DBDisk::readArticle(int group, int article)
 
     //read article
     ifstream in_article;
-    in_article.open(path + "g" + to_string(group) + "a" + to_string(article) + ".txt", fstream::in);
+    in_article.open(fs_root + "g" + to_string(group) + "a" + to_string(article) + ".txt", fstream::in);
     string author, text;
     getline(in_article, author);
     getline(in_article, text);
@@ -112,7 +112,7 @@ const Article DBDisk::readArticle(int group, int article)
     return Article{pair.first, title, author, text};
 }
 
-const vector<Group> DBDisk::readGroups()
+const vector<Group> &DBDisk::readGroups()
 {
     return groups;
 }
@@ -130,7 +130,7 @@ void DBDisk::writeGroup(const string &name)
     string title = regex_replace(name, regex(" "), "\\\\s");
     ofstream out_register; // newsgorup.txt
     ofstream out_group;    //[gid.txt]
-    out_register.open(path + "newsgroup.txt", fstream::app);
+    out_register.open(fs_root + "newsgroup.txt", fstream::app);
     int id = 1;
     if (groups.size() > 0)
     {
@@ -143,7 +143,7 @@ void DBDisk::writeGroup(const string &name)
     groups.push_back(Group{id, name, vector<Article>{}});
 
     //create the group file
-    out_group.open(path + "g" + to_string(id) + ".txt", fstream::out);
+    out_group.open(fs_root + "g" + to_string(id) + ".txt", fstream::out);
     out_group.close();
 }
 
@@ -155,7 +155,7 @@ const vector<Article> DBDisk::readArticles(int group)
     //read group
     vector<Article> articles;
     ifstream in_group;
-    in_group.open(path + "g" + to_string(group) + ".txt", fstream::in);
+    in_group.open(fs_root + "g" + to_string(group) + ".txt", fstream::in);
     string line;
     pair<int, string> pair;
     while (getline(in_group, line))
@@ -183,7 +183,7 @@ void DBDisk::deleteArticle(int group, int article)
     //delete article in group
     articles.erase(article_it);
     ofstream out_group; //create a tmp.txt, later rename to gid.txt
-    string group_path = path + "g" + to_string(group) + ".txt";
+    string group_path = fs_root + "g" + to_string(group) + ".txt";
     out_group.open(group_path, fstream::trunc);
     string title;
     for (Article a : articles)
@@ -194,7 +194,7 @@ void DBDisk::deleteArticle(int group, int article)
     out_group.close();
 
     //delete article
-    string article_path = path + "g" + to_string(group) + "a" + to_string(article) + ".txt";
+    string article_path = fs_root + "g" + to_string(group) + "a" + to_string(article) + ".txt";
     remove(article_path.c_str()); //remove the article document.
 }
 
@@ -207,20 +207,20 @@ void DBDisk::deleteGroup(int group)
     vector<Article> articles = readArticles(group);
 
     //delete group file
-    string group_path = path + "g" + to_string(group) + ".txt";
+    string group_path = fs_root + "g" + to_string(group) + ".txt";
     remove(group_path.c_str());
 
     //delete articles
     for (Article article : articles)
     {
-        string article_path = path + "g" + to_string(group) + "a" + to_string(article.id) + ".txt";
+        string article_path = fs_root + "g" + to_string(group) + "a" + to_string(article.id) + ".txt";
         remove(article_path.c_str()); //remove the article document.
     }
 
     //delete group from register
     groups.erase(it);
     ofstream out_groups;
-    string groups_path = path + "newsgroup.txt";
+    string groups_path = fs_root + "newsgroup.txt";
     out_groups.open(groups_path, fstream::trunc);
     string title;
     for (Group g : groups)

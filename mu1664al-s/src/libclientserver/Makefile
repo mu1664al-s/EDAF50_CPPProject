@@ -38,11 +38,12 @@ SRC = $(wildcard *.cc)
 
 # Standard clean
 clean:
-	rm $(SRC:.cc=.o) $(PROGS)
+	rm -f $(SRC:.cc=.o) $(PROGS)
 
 distclean: clean
-	-rm libclientserver.a
-	-rm $(SRC:.cc=.d) 
+	-rm -f libclientserver.a
+	-rm -f $(SRC:.cc=.d) 
+	-rm -rf $(addsuffix .dSym,$(PROGS)) # for cleaning on Macs
 
 # Include the *.d files
 -include $(SRC:.cc=.d)

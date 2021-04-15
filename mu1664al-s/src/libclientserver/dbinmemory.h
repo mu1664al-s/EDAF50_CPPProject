@@ -10,7 +10,7 @@ public:
 
     virtual const Article readArticle(int group, int article); // done
 
-    virtual const vector<Group> readGroups(); // done
+    virtual const vector<Group> &readGroups(); // done
 
     virtual void writeGroup(const string &name); // done
 

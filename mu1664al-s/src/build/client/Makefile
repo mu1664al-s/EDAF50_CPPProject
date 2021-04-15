@@ -45,8 +45,8 @@ clean:
 
 
 distclean: clean
-	-rm $(SRC:.cc=.d)
-	-rm -r $(addsuffix .dSym,$(PROGS)) # for cleaning on Macs
+	-rm -f $(SRC:.cc=.d)
+	-rm -rf $(addsuffix .dSym,$(PROGS)) # for cleaning on Macs
 
 install:
 	cp client ../../../bin

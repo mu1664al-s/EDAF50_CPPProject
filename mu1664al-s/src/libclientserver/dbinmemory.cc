@@ -50,7 +50,7 @@ const Article DBInMemory::readArticle(int group, int article)
     }
 }
 
-const vector<Group> DBInMemory::readGroups()
+const vector<Group> &DBInMemory::readGroups()
 {
     return this->groups;
 }
