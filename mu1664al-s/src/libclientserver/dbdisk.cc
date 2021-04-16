@@ -18,7 +18,7 @@ DBDisk::DBDisk(const string &fs_root)
     in_register.open(fs_root + "newsgroup.txt", fstream::out | fstream::in);
     while (getline(in_register, line))
     {
-        pair = readPair(line, true);
+        pair = readPair(line);
         groups.push_back(Group{pair.first, pair.second, vector<Article>{}});
     }
     in_register.close();
@@ -38,7 +38,7 @@ void DBDisk::writeArticle(int group, const Article &article)
     pair<int, string> pair;
     while (getline(in_group, line))
     {
-        pair = readPair(line, true);
+        pair = readPair(line);
         if (pair.second == article.title)
         {
             throw DBException{DBExceptionType::ARTICLE_ALREADY_EXISTS, ""};
@@ -48,22 +48,26 @@ void DBDisk::writeArticle(int group, const Article &article)
 
     // defined output
     int next_id = pair.first + 1;
-    string title = regex_replace(article.title, regex(" "), "\\\\s");
-    string author = regex_replace(article.author, regex(" "), "\\\\s");
-    string text = regex_replace(article.text, regex(" "), "\\\\s");
-    text = regex_replace(text, regex("\n+"), "\\n");
 
     //adding article to group
     ofstream out_group;
     out_group.open(fs_root + "g" + to_string(group) + ".txt", fstream::app | fstream::out);
-    out_group << next_id << "<>" << title << endl;
+    out_group << next_id << "<>" << article.title << endl;
     ofstream out_article;
     out_group.close();
 
     //writing the article to file
     out_article.open(fs_root + "g" + to_string(group) + "a" + to_string(next_id) + ".txt", fstream::out);
-    out_article << author << endl
-                << text << endl;
+    out_article << article.author << endl;
+    istringstream ss(article.text);
+    string text_line;
+    getline(ss, text_line);
+    out_article << text_line;
+    while (getline(ss, text_line))
+    {
+        out_article << "\n"
+                    << text_line;
+    }
     out_article.close();
 }
 
@@ -100,16 +104,19 @@ const Article DBDisk::readArticle(int group, int article)
     in_article.open(fs_root + "g" + to_string(group) + "a" + to_string(article) + ".txt", fstream::in);
     string author, text;
     getline(in_article, author);
+    string text_line = "";
     getline(in_article, text);
-
-    //create article structure
-    string title = regex_replace(pair.second, regex("\\\\\\\\s"), " ");
-    author = regex_replace(author, regex("\\\\\\\\s"), " ");
-    text = regex_replace(text, regex("\\\\n"), "\n");
-    text = regex_replace(text, regex("\\\\\\\\s"), " ");
+    while (getline(in_article, text_line))
+    {
+        text += "\n" + text_line;
+    }
+    if (!(text_line == ""))
+    {
+        text += "\n";
+    }
     in_article.close();
 
-    return Article{pair.first, title, author, text};
+    return Article{pair.first, pair.second, author, text};
 }
 
 const vector<Group> &DBDisk::readGroups()
@@ -117,17 +124,16 @@ const vector<Group> &DBDisk::readGroups()
     return groups;
 }
 
-void DBDisk::writeGroup(const string &name)
+void DBDisk::writeGroup(const string &title)
 {
     //check the register after group name
-    auto it = find_if(groups.begin(), groups.end(), [&name](const Group &group) { return group.title == name; });
+    auto it = find_if(groups.begin(), groups.end(), [&title](const Group &group) { return group.title == title; });
     if (it != groups.end())
     {
         throw DBException{DBExceptionType::GROUP_ALREADY_EXISTS, ""};
     }
 
     //write to news groups
-    string title = regex_replace(name, regex(" "), "\\\\s");
     ofstream out_register; // newsgorup.txt
     ofstream out_group;    //[gid.txt]
     out_register.open(fs_root + "newsgroup.txt", fstream::app);
@@ -140,7 +146,7 @@ void DBDisk::writeGroup(const string &name)
     out_register.close();
 
     //add to register
-    groups.push_back(Group{id, name, vector<Article>{}});
+    groups.push_back(Group{id, title, vector<Article>{}});
 
     //create the group file
     out_group.open(fs_root + "g" + to_string(id) + ".txt", fstream::out);
@@ -160,7 +166,7 @@ const vector<Article> DBDisk::readArticles(int group)
     pair<int, string> pair;
     while (getline(in_group, line))
     {
-        pair = readPair(line, true);
+        pair = readPair(line);
         articles.push_back(Article{pair.first, pair.second, "", ""});
     }
     in_group.close();
@@ -185,11 +191,9 @@ void DBDisk::deleteArticle(int group, int article)
     ofstream out_group; //create a tmp.txt, later rename to gid.txt
     string group_path = fs_root + "g" + to_string(group) + ".txt";
     out_group.open(group_path, fstream::trunc);
-    string title;
     for (Article a : articles)
     {
-        title = regex_replace(a.title, regex(" "), "\\\\s");
-        out_group << a.id << "<>" << title << endl;
+        out_group << a.id << "<>" << a.title << endl;
     }
     out_group.close();
 
@@ -225,32 +229,28 @@ void DBDisk::deleteGroup(int group)
     string title;
     for (Group g : groups)
     {
-        title = regex_replace(g.title, regex(" "), "\\\\s");
-        out_groups << g.id << "<>" << title << endl;
+        out_groups << g.id << "<>" << g.title << endl;
     }
     out_groups.close();
 }
 
 vector<Group>::iterator DBDisk::checkRegister(int group)
 {
-    auto it = find_if(groups.begin(), groups.end(), [&group](const Group &g) { return g.id == group; });
-    if (it == groups.end())
+    // binary search
+    auto it = lower_bound(groups.begin(), groups.end(), group, [](const Group &g, int id) { return g.id < id; });
+    if (it == groups.end() || it->id != group)
     {
         throw DBException{DBExceptionType::GROUP_NOT_FOUND, ""};
     }
     return it;
 }
 
-pair<int, string> DBDisk::readPair(const string &line, bool escape) const
+pair<int, string> DBDisk::readPair(const string &line)
 {
-    int id;
-    string title;
-    char delim;
-    istringstream ss(line);
-    ss >> id >> delim >> delim >> title;
-    if (escape)
-    {
-        title = regex_replace(title, regex("\\\\\\\\s"), " ");
-    }
+    std::smatch sm;
+    std::regex e("^([0-9]*)<>(.*)$");
+    std::regex_match(line, sm, e);
+    int id = std::stoi(sm.str(1));
+    string title = sm.str(2);
     return make_pair(id, title);
 }

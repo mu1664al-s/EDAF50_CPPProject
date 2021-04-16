@@ -22,6 +22,7 @@ public:
 
 private:
     vector<Group> groups;
+    vector<Group>::iterator checkRegister(int group);
 };
 
 #endif

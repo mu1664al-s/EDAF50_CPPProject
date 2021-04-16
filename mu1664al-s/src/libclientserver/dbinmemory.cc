@@ -11,42 +11,27 @@ DBInMemory::~DBInMemory()
 
 void DBInMemory::writeArticle(int group, const Article &article)
 {
-    auto it = find_if(groups.begin(), groups.end(), [group](const Group &g) { return g.id == group; });
-    if (it == groups.end())
+    auto it = checkRegister(group);
+    int newarticleid = 1;
+    if (it->articles.size() > 0)
     {
-        throw DBException{DBExceptionType::GROUP_NOT_FOUND, " group not found"};
+        newarticleid = it->articles.back().id + 1;
     }
-    else
-    {
-        int newarticleid = 1;
-        if (it->articles.size() > 0)
-        {
-            newarticleid = it->articles.back().id + 1;
-        }
-        Article newarticle{newarticleid, article.title, article.author, article.text};
-        it->articles.push_back(newarticle);
-    }
+    Article newarticle{newarticleid, article.title, article.author, article.text};
+    it->articles.push_back(newarticle);
 }
 
 const Article DBInMemory::readArticle(int group, int article)
 {
-    auto it = find_if(groups.begin(), groups.end(), [group](const Group &g) { return g.id == group; });
-
-    if (it == groups.end())
+    auto it = checkRegister(group);
+    auto itart = find_if(it->articles.begin(), it->articles.end(), [article](const Article &a) { return a.id == article; });
+    if (itart == it->articles.end())
     {
-        throw DBException{DBExceptionType::GROUP_NOT_FOUND, " group not found"};
+        throw DBException{DBExceptionType::ARTICLE_NOT_FOUND, " article not found"};
     }
     else
     {
-        auto itart = find_if(it->articles.begin(), it->articles.end(), [article](const Article &a) { return a.id == article; });
-        if (itart == it->articles.end())
-        {
-            throw DBException{DBExceptionType::ARTICLE_NOT_FOUND, " article not found"};
-        }
-        else
-        {
-            return *itart;
-        }
+        return *itart;
     }
 }
 
@@ -73,47 +58,38 @@ void DBInMemory::writeGroup(const string &name)
 
 const vector<Article> DBInMemory::readArticles(int group)
 {
-    auto it = find_if(groups.begin(), groups.end(), [group](const Group &g) { return g.id == group; });
-    if (it == groups.end())
-    {
-        throw DBException{DBExceptionType::GROUP_NOT_FOUND, " group not found"};
-    }
-    else
-    {
-        return it->articles;
-    }
+    auto it = checkRegister(group);
+    return it->articles;
 }
 
 void DBInMemory::deleteArticle(int group, int article)
 {
-    auto it = find_if(groups.begin(), groups.end(), [group](const Group &g) { return g.id == group; });
-    if (it == groups.end())
+    auto it = checkRegister(group);
+
+    auto itart = lower_bound(it->articles.begin(), it->articles.end(), article, [](const Article &a, int id) { return a.id < id; });
+    if (itart == it->articles.end())
     {
-        throw DBException{DBExceptionType::GROUP_NOT_FOUND, " group not found"};
+        throw DBException{DBExceptionType::ARTICLE_NOT_FOUND, " article not found"};
     }
     else
     {
-        auto itart = find_if(it->articles.begin(), it->articles.end(), [article](const Article &a) { return a.id == article; });
-        if (itart == it->articles.end())
-        {
-            throw DBException{DBExceptionType::ARTICLE_NOT_FOUND, " article not found"};
-        }
-        else
-        {
-            it->articles.erase(itart);
-        }
+        it->articles.erase(itart);
     }
 }
 
 void DBInMemory::deleteGroup(int group)
 {
-    auto it = find_if(groups.begin(), groups.end(), [group](const Group &g) { return g.id == group; });
-    if (it == groups.end())
+    auto it = checkRegister(group);
+    groups.erase(it);
+}
+
+vector<Group>::iterator DBInMemory::checkRegister(int group)
+{
+    // binary search
+    auto it = lower_bound(groups.begin(), groups.end(), group, [](const Group &g, int id) { return g.id < id; });
+    if (it == groups.end() || it->id != group)
     {
-        throw DBException{DBExceptionType::GROUP_NOT_FOUND, " group not found"};
+        throw DBException{DBExceptionType::GROUP_NOT_FOUND, ""};
     }
-    else
-    {
-        groups.erase(it);
-    }
+    return it;
 }

@@ -20,7 +20,7 @@ public:
 
     virtual const vector<Group> &readGroups();
 
-    virtual void writeGroup(const string &name);
+    virtual void writeGroup(const string &title);
 
     virtual const vector<Article> readArticles(int group);
 
@@ -34,7 +34,7 @@ private:
     string fs_root;
     vector<Group> groups;
     vector<Group>::iterator checkRegister(int group);
-    pair<int, string> readPair(const string &line, bool escape = false) const;
+    pair<int, string> readPair(const string &line);
 };
 
 #endif
