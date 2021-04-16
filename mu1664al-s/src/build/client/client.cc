@@ -103,12 +103,28 @@ void ansListGroups(const Message &ms)
     }
 }
 
+int numberInputHandler(const string &message)
+{
+    int id;
+    cout << message;
+    cin >> id;
+    while (id == 0)
+    {
+        cout << endl;
+        cout << ">>Error! Please input a number greater than 0." << endl;
+        cin.clear();
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        cout << endl;
+        cout << message;
+        cin >> id;
+    }
+    return id;
+}
+
 void listArticles(Message &ms)
 {
     // guided process
-    int id;
-    cout << "ID of the news group: ";
-    cin >> id;
+    int id = numberInputHandler("ID of the news group: ");
     ms.setCommand(Protocol::COM_LIST_ART).addNumParam(id);
     cout << endl;
 }
@@ -156,9 +172,10 @@ void ansListArticles(const Message &ms)
 
 void createGroup(Message &ms)
 {
+    cin.ignore();
     string title;
     cout << "Name the new group: ";
-    cin >> title;
+    getline(cin, title);
     ms.setCommand(Protocol::COM_CREATE_NG).addStrParam(title);
     cout << endl;
 }
@@ -182,20 +199,29 @@ void ansCreateGroup(const Message &ms)
 void createArticle(Message &ms)
 {
     // guided process
-    int id;
-    cout << "ID of the news group: ";
-    cin >> id;
+    int id = numberInputHandler("ID of the news group: ");
+    cin.ignore();
     string title;
     cout << "Title: ";
-    cin >> title;
+    getline(cin, title);
     string author;
     cout << "Author: ";
-    cin >> author;
+    getline(cin, author);
     string text;
-    cout << "Text: ";
-    cin >> text;
+    string text_line;
+    cout << "Text: " << endl;
+    //getline(cin, text, static_cast<char>(EOF));
+    while (getline(cin, text_line))
+    {
+        if (text_line == "<<EOF>>")
+        {
+            break;
+        }
+        text += text_line + "\n";
+    }
     ms.setCommand(Protocol::COM_CREATE_ART).addNumParam(id).addStrParam(title).addStrParam(author).addStrParam(text);
     cout << endl;
+    return;
 }
 
 void ansCreateArticle(const Message &ms)
@@ -218,9 +244,7 @@ void ansCreateArticle(const Message &ms)
 void deleteGroup(Message &ms)
 {
     // guided process
-    int id;
-    cout << "ID of the news group: ";
-    cin >> id;
+    int id = numberInputHandler("ID of the news group: ");
     ms.setCommand(Protocol::COM_DELETE_NG).addNumParam(id);
     cout << endl;
 }
@@ -245,12 +269,8 @@ void ansDeleteGroup(const Message &ms)
 void deleteArticle(Message &ms)
 {
     // guided process
-    int group_id;
-    cout << "ID of the news group: ";
-    cin >> group_id;
-    int article_id;
-    cout << "ID of the article: ";
-    cin >> article_id;
+    int group_id = numberInputHandler("ID of the news group: ");
+    int article_id = numberInputHandler("ID of the article: ");
     ms.setCommand(Protocol::COM_DELETE_ART).addNumParam(group_id).addNumParam(article_id);
     cout << endl;
 }
@@ -282,12 +302,8 @@ void ansDeleteArticle(const Message &ms)
 void getArticle(Message &ms)
 {
     // guided process
-    int group_id;
-    cout << "ID of the news group: ";
-    cin >> group_id;
-    int article_id;
-    cout << "ID of the article: ";
-    cin >> article_id;
+    int group_id = numberInputHandler("ID of the news group: ");
+    int article_id = numberInputHandler("ID of the article: ");
     ms.setCommand(Protocol::COM_GET_ART).addNumParam(group_id).addNumParam(article_id);
     cout << endl;
 }
@@ -373,7 +389,6 @@ void handleCommand(shared_ptr<Connection> conn, int command)
     }
     case Protocol::COM_DELETE_NG:
     {
-        cout << "delete" << endl;
         deleteGroup(ms);
         break;
     }
