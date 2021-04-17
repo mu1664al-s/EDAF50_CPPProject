@@ -6,6 +6,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 using std::string;
 using std::vector;
@@ -48,11 +49,11 @@ public:
 
 	virtual const Article readArticle(int group, int article) = 0; // read an article from a newsgroup, using group identity and article identity
 
-	virtual const vector<Group> &readGroups() = 0;
+	virtual const std::shared_ptr<vector<Group>> readGroups() = 0;
 
 	virtual void writeGroup(const string &name) = 0; //
 
-	virtual const vector<Article> readArticles(int group) = 0; // get articles from a newsgroup, using the group identity
+	virtual const std::shared_ptr<vector<Article>> readArticles(int group) = 0; // get articles from a newsgroup, using the group identity
 
 	virtual void deleteArticle(int group, int article) = 0; //delete an article, specified by its id in a newsgroup.
 

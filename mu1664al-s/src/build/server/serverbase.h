@@ -115,9 +115,9 @@ public:
 private:
     void listGroups(shared_ptr<DBInterface> database, Message &ms)
     {
-        const vector<Group> &groups = database->readGroups();
-        ms.setCommand(Protocol::ANS_LIST_NG).addNumParam(groups.size());
-        for (const Group &g : groups)
+        const std::shared_ptr<vector<Group>> groups = database->readGroups();
+        ms.setCommand(Protocol::ANS_LIST_NG).addNumParam(groups->size());
+        for (const Group &g : *groups)
         {
             ms.addNumParam(g.id).addStrParam(g.title);
         }
@@ -128,9 +128,9 @@ private:
         try
         {
             const int &id = message.getParmaters()[0].N;
-            const vector<Article> &articles = database->readArticles(id);
-            ms.setCommand(Protocol::ANS_LIST_ART).setStatus(Protocol::ANS_ACK).addNumParam(articles.size());
-            for (const Article &a : articles)
+            const std::shared_ptr<vector<Article>> &articles = database->readArticles(id);
+            ms.setCommand(Protocol::ANS_LIST_ART).setStatus(Protocol::ANS_ACK).addNumParam(articles->size());
+            for (const Article &a : *articles)
             {
                 ms.addNumParam(a.id).addStrParam(a.title);
             }

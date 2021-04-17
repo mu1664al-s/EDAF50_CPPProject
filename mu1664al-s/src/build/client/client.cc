@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <ios>
 #include <stdexcept>
 #include <string>
 #include <memory>
@@ -209,8 +210,7 @@ void createArticle(Message &ms)
     getline(cin, author);
     string text;
     string text_line;
-    cout << "Text: " << endl;
-    //getline(cin, text, static_cast<char>(EOF));
+    cout << "Text (Type <<EOF>> in a new line to quit): " << endl;
     while (getline(cin, text_line))
     {
         if (text_line == "<<EOF>>")
@@ -221,7 +221,6 @@ void createArticle(Message &ms)
     }
     ms.setCommand(Protocol::COM_CREATE_ART).addNumParam(id).addStrParam(title).addStrParam(author).addStrParam(text);
     cout << endl;
-    return;
 }
 
 void ansCreateArticle(const Message &ms)

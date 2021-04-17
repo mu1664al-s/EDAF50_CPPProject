@@ -11,79 +11,53 @@ DBInMemory::~DBInMemory()
 
 void DBInMemory::writeArticle(int group, const Article &article)
 {
-    auto it = checkRegister(group);
-    int newarticleid = 1;
-    if (it->articles.size() > 0)
-    {
-        newarticleid = it->articles.back().id + 1;
-    }
+    auto it = checkGroups(group);
+    checkList<Article>(it->articles, article.title, DBException{DBExceptionType::ARTICLE_ALREADY_EXISTS, " article exists"});
+
+    int newarticleid = nextId<Article>(it->articles);
     Article newarticle{newarticleid, article.title, article.author, article.text};
     it->articles.push_back(newarticle);
 }
 
 const Article DBInMemory::readArticle(int group, int article)
 {
-    auto it = checkRegister(group);
-    auto itart = find_if(it->articles.begin(), it->articles.end(), [article](const Article &a) { return a.id == article; });
-    if (itart == it->articles.end())
-    {
-        throw DBException{DBExceptionType::ARTICLE_NOT_FOUND, " article not found"};
-    }
-    else
-    {
-        return *itart;
-    }
+    auto it = checkGroups(group);
+    return *checkArticles(it, article);
 }
 
-const vector<Group> &DBInMemory::readGroups()
+const std::shared_ptr<vector<Group>> DBInMemory::readGroups()
 {
-    return this->groups;
+    return std::make_shared<vector<Group>>(this->groups);
 }
 
-void DBInMemory::writeGroup(const string &name)
+void DBInMemory::writeGroup(const string &title)
 {
-    auto it = find_if(groups.begin(), groups.end(), [name](const Group &g) { return g.title == name; });
-    if (it != groups.end())
-    {
-        throw DBException{DBExceptionType::GROUP_ALREADY_EXISTS, " group exists"};
-    }
-    int newid = 1;
-    if (groups.size() > 0)
-    {
-        newid = groups.back().id + 1;
-    }
-    Group newgroup{newid, name, vector<Article>{}};
+    checkList<Group>(groups, title, DBException{DBExceptionType::GROUP_ALREADY_EXISTS, " group exists"});
+    int newid = nextId<Group>(groups);
+    Group newgroup{newid, title, vector<Article>{}};
     this->groups.push_back(newgroup);
 }
 
-const vector<Article> DBInMemory::readArticles(int group)
+const std::shared_ptr<vector<Article>> DBInMemory::readArticles(int group)
 {
-    auto it = checkRegister(group);
-    return it->articles;
+    auto it = checkGroups(group);
+    return std::make_shared<vector<Article>>(it->articles);
 }
 
 void DBInMemory::deleteArticle(int group, int article)
 {
-    auto it = checkRegister(group);
-
-    auto itart = lower_bound(it->articles.begin(), it->articles.end(), article, [](const Article &a, int id) { return a.id < id; });
-    if (itart == it->articles.end())
-    {
-        throw DBException{DBExceptionType::ARTICLE_NOT_FOUND, " article not found"};
-    }
-    else
-    {
-        it->articles.erase(itart);
-    }
+    auto it = checkGroups(group);
+    auto itart = checkArticles(it, article);
+    it->articles.erase(itart);
 }
 
 void DBInMemory::deleteGroup(int group)
 {
-    auto it = checkRegister(group);
+    auto it = checkGroups(group);
     groups.erase(it);
 }
 
-vector<Group>::iterator DBInMemory::checkRegister(int group)
+vector<Group>::iterator DBInMemory::checkGroups(int group)
 {
     // binary search
     auto it = lower_bound(groups.begin(), groups.end(), group, [](const Group &g, int id) { return g.id < id; });
@@ -92,4 +66,15 @@ vector<Group>::iterator DBInMemory::checkRegister(int group)
         throw DBException{DBExceptionType::GROUP_NOT_FOUND, ""};
     }
     return it;
+}
+
+vector<Article>::iterator DBInMemory::checkArticles(vector<Group>::iterator &it, int article)
+{
+    // binary search
+    auto itar = lower_bound(it->articles.begin(), it->articles.end(), article, [](const Article &a, int id) { return a.id < id; });
+    if (itar == it->articles.end() || itar->id != article)
+    {
+        throw DBException{DBExceptionType::ARTICLE_NOT_FOUND, ""};
+    }
+    return itar;
 }
