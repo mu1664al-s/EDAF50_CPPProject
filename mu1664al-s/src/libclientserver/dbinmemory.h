@@ -6,43 +6,24 @@ class DBInMemory : public DBInterface
 {
 public:
     ~DBInMemory();
-    virtual void writeArticle(int group, const Article &article); // done
+    virtual void writeArticle(size_t group, const Article &article); // done
 
-    virtual const Article readArticle(int group, int article); // done
+    virtual const Article readArticle(size_t group, size_t article); // done
 
     virtual const std::shared_ptr<vector<Group>> readGroups(); // done
 
     virtual void writeGroup(const string &name); // done
 
-    virtual const std::shared_ptr<vector<Article>> readArticles(int group); // done
+    virtual const std::shared_ptr<vector<Article>> readArticles(size_t group); // done
 
-    virtual void deleteArticle(int group, int article); // done
+    virtual void deleteArticle(size_t group, size_t article); // done
 
-    virtual void deleteGroup(int group); // done
+    virtual void deleteGroup(size_t group); // done
 
 private:
     vector<Group> groups;
-    vector<Group>::iterator checkGroups(int group);
-    vector<Article>::iterator checkArticles(vector<Group>::iterator &it, int article);
-    template <typename T>
-    int nextId(const vector<T> &list)
-    {
-        if (list.size() > 0)
-        {
-            return list.back().id + 1;
-        }
-        return 1;
-    }
-
-    template <typename T>
-    void checkList(const vector<T> &list, const string &title, const DBException &e)
-    {
-        auto it = find_if(list.begin(), list.end(), [&title](const T &item) { return item.title == title; });
-        if (it != list.end())
-        {
-            throw e;
-        }
-    }
+    vector<Group>::iterator checkGroups(size_t group);
+    vector<Article>::iterator checkArticles(vector<Group>::iterator &it, size_t article);
 };
 
 #endif

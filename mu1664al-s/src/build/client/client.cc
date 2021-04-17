@@ -26,7 +26,7 @@ Connection init(int argc, char *argv[])
 {
     if (argc != 3)
     {
-        cerr << "Usage: myclient host-name port-number" << endl;
+        cerr << "Usage: client host-name port-number" << endl;
         exit(1);
     }
 

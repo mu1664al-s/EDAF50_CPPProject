@@ -21,7 +21,7 @@ Message::Message(const string &package)
     for (; param_offset < package.length() - 1;)
     {
         Protocol type = static_cast<Protocol>(package[param_offset]);
-        int N = decNum(package.substr(param_offset + 1, 4));
+        size_t N = decNum(package.substr(param_offset + 1, 4));
         param_offset += 5;
         string str = "";
         if (type == Protocol::PAR_STRING)
@@ -74,7 +74,7 @@ int Message::decNum(const string &str) const
     return (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
 }
 
-const string Message::encNum(int value) const
+const string Message::encNum(size_t value) const
 {
     string str = "";
     str += (value >> 24) & 0xFF;
@@ -84,7 +84,7 @@ const string Message::encNum(int value) const
     return str;
 }
 
-Message &Message::addNumParam(int num)
+Message &Message::addNumParam(size_t num)
 {
     parameters.push_back(Parameter{Protocol::PAR_NUM, num, ""});
     return *this;
@@ -92,6 +92,6 @@ Message &Message::addNumParam(int num)
 
 Message &Message::addStrParam(const string &str)
 {
-    parameters.push_back(Parameter{Protocol::PAR_STRING, static_cast<int>(str.length()), str});
+    parameters.push_back(Parameter{Protocol::PAR_STRING, str.length(), str});
     return *this;
 }

@@ -88,7 +88,7 @@ public:
     {
         if (argc != 2)
         {
-            cerr << "Usage: myserver port-number" << endl;
+            cerr << "Usage: server port-number" << endl;
             exit(1);
         }
 
