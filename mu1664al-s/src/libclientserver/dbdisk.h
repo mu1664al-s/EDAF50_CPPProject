@@ -14,21 +14,19 @@ class DBDisk : public DBInterface
 public:
     ~DBDisk();
     DBDisk(const string &fs_root);
-    virtual void writeArticle(size_t group, const Article &article);
+    virtual void writeArticle(int group, const Article &article);
 
-    virtual const Article readArticle(size_t group, size_t article);
+    virtual const Article readArticle(int group, int article);
 
     virtual const std::shared_ptr<vector<Group>> readGroups();
 
     virtual void writeGroup(const string &title);
 
-    virtual const std::shared_ptr<vector<Article>> readArticles(size_t group);
+    virtual const std::shared_ptr<vector<Article>> readArticles(int group);
 
-    virtual void deleteArticle(size_t group, size_t article);
+    virtual void deleteArticle(int group, int article);
 
-    virtual void deleteGroup(size_t group);
-    void getids();
-    void getnames();
+    virtual void deleteGroup(int group);
 
 private:
     string fs_root;

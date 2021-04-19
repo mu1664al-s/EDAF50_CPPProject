@@ -78,30 +78,22 @@ void listGroups(Message &ms)
 
 void ansListGroups(const Message &ms)
 {
-    try
+    const vector<Parameter> &params = ms.getParmaters();
+    if (params[0].N > 0)
     {
-        const vector<Parameter> &params = ms.getParmaters();
-        if (params[0].N > 0)
+        cout << ">>";
+        for (size_t i = 1; i < params.size();)
         {
-            cout << ">>";
-            for (size_t i = 1; i < params.size();)
-            {
-                cout << params[i].N << ". ";
-                cout << params[i + 1].str << "\t";
-                i += 2;
-            }
+            cout << params[i].N << ". ";
+            cout << params[i + 1].str << "\t";
+            i += 2;
         }
-        else
-        {
-            cout << ">>No news groups found!";
-        }
-        cout << endl;
     }
-    catch (exception &e)
+    else
     {
-        cerr << e.what() << endl;
-        throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE, ""};
+        cout << ">>No news groups exist!";
     }
+    cout << endl;
 }
 
 int numberInputHandler(const string &message)
@@ -133,42 +125,29 @@ void listArticles(Message &ms)
 void ansListArticles(const Message &ms)
 {
     // print response
-    try
+    if (ms.getStatus() == Protocol::ANS_ACK)
     {
-        if (ms.getStatus() == Protocol::ANS_ACK)
+        const vector<Parameter> &params = ms.getParmaters();
+        if (params[0].N > 0)
         {
-            const vector<Parameter> &params = ms.getParmaters();
-            if (params[0].N > 0)
+            cout << ">>";
+            for (size_t i = 1; i < params.size();)
             {
-                cout << ">>";
-                for (size_t i = 1; i < params.size();)
-                {
-                    cout << params[i].N << ". ";
-                    cout << params[i + 1].str << "\t";
-                    i += 2;
-                }
+                cout << params[i].N << ". ";
+                cout << params[i + 1].str << "\t";
+                i += 2;
             }
-            else
-            {
-                cout << ">>No articles found!";
-            }
-        }
-        else if (ms.getStatus() == Protocol::ANS_NAK)
-        {
-            cout << ">>Error! News group alredy exists." << endl;
         }
         else
         {
-            throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE, ""};
+            cout << ">>No articles exist!";
         }
-
-        cout << endl;
     }
-    catch (exception &e)
+    else if (ms.getStatus() == Protocol::ANS_NAK)
     {
-        cerr << e.what() << endl;
-        throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE, ""};
+        cout << ">>Error! News group does not exist.";
     }
+    cout << endl;
 }
 
 void createGroup(Message &ms)
@@ -189,11 +168,7 @@ void ansCreateGroup(const Message &ms)
     }
     else if (ms.getStatus() == Protocol::ANS_NAK)
     {
-        cout << ">>Error! News group alredy exists." << endl;
-    }
-    else
-    {
-        throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE, ""};
+        cout << ">>Error! News group already exists." << endl;
     }
 }
 
@@ -232,11 +207,7 @@ void ansCreateArticle(const Message &ms)
     }
     else if (ms.getStatus() == Protocol::ANS_NAK)
     {
-        cout << ">>Error! News group not found." << endl;
-    }
-    else
-    {
-        throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE, ""};
+        cout << ">>Error! News group does not exist." << endl;
     }
 }
 
@@ -257,11 +228,7 @@ void ansDeleteGroup(const Message &ms)
     }
     else if (ms.getStatus() == Protocol::ANS_NAK)
     {
-        cout << ">>Error! News group not found." << endl;
-    }
-    else
-    {
-        throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE, ""};
+        cout << ">>Error! News group does not exist." << endl;
     }
 }
 
@@ -285,16 +252,12 @@ void ansDeleteArticle(const Message &ms)
     {
         if (ms.getError() == Protocol::ERR_NG_DOES_NOT_EXIST)
         {
-            cout << ">>Error! News group not found." << endl;
+            cout << ">>Error! News group does not exist." << endl;
         }
-        else if (ms.getError() == Protocol::ERR_NG_DOES_NOT_EXIST)
+        else if (ms.getError() == Protocol::ERR_ART_DOES_NOT_EXIST)
         {
-            cout << ">>Error! Article not found." << endl;
+            cout << ">>Error! Article does not exist." << endl;
         }
-    }
-    else
-    {
-        throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE, ""};
     }
 }
 
@@ -312,37 +275,25 @@ void ansGetArticle(const Message &ms)
     // print response
     if (ms.getStatus() == Protocol::ANS_ACK)
     {
-        try
-        {
-            const vector<Parameter> &params = ms.getParmaters();
-            string title = params[0].str;
-            cout << ">>Title: " << title << endl;
-            string author = params[1].str;
-            cout << ">>Author: " << title << endl;
-            string text = params[2].str;
-            cout << ">>Text: " << endl;
-            cout << text << endl;
-        }
-        catch (exception &e)
-        {
-            cerr << e.what() << endl;
-            throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE, ""};
-        }
+        const vector<Parameter> &params = ms.getParmaters();
+        string title = params[0].str;
+        cout << ">>Title: " << title << endl;
+        string author = params[1].str;
+        cout << ">>Author: " << author << endl;
+        string text = params[2].str;
+        cout << ">>Text: " << endl;
+        cout << text << endl;
     }
     else if (ms.getStatus() == Protocol::ANS_NAK)
     {
         if (ms.getError() == Protocol::ERR_NG_DOES_NOT_EXIST)
         {
-            cout << ">>Error! News group not found." << endl;
+            cout << ">>Error! News group does not exist." << endl;
         }
-        else if (ms.getError() == Protocol::ERR_NG_DOES_NOT_EXIST)
+        else if (ms.getError() == Protocol::ERR_ART_DOES_NOT_EXIST)
         {
-            cout << ">>Error! Article not found." << endl;
+            cout << ">>Error! Article does not exist." << endl;
         }
-    }
-    else
-    {
-        throw MessageException{MessageExceptionType::ILLEGAL_MESSAGE, ""};
     }
 }
 
@@ -455,8 +406,8 @@ void handleCommand(shared_ptr<Connection> conn, int command)
     }
     catch (MessageException &)
     {
-        cout << ">>Recieved ILLEGAL MESSAGE!" << endl;
         cout << endl;
+        cout << ">>Recieved illegal message." << endl;
     }
 }
 
@@ -476,7 +427,7 @@ int app(shared_ptr<Connection> conn)
         }
         catch (ConnectionClosedException &)
         {
-            cout << " no reply from server. Exiting." << endl;
+            cout << "No reply from server. Exiting." << endl;
             return 1;
         }
         print_commands();

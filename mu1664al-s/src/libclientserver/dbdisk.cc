@@ -12,10 +12,6 @@ using namespace std;
 DBDisk::DBDisk(const string &fs_root)
 {
     this->fs_root = fs_root;
-    //create newsgroup.tx if it doesn't exists
-    ofstream out_register;
-    out_register.open(fs_root + "newsgroup.txt", fstream::out);
-    out_register.close();
 }
 DBDisk::~DBDisk()
 {
@@ -72,17 +68,17 @@ inline void readArticle(const string &path, Article &article)
     in_article.close();
 }
 
-pair<size_t, string> readPair(const string &line)
+pair<int, string> readPair(const string &line)
 {
     std::smatch sm;
     std::regex e("^([0-9]*)<>(.*)$");
     std::regex_match(line, sm, e);
-    size_t id = std::stoi(sm.str(1));
+    int id = std::stoi(sm.str(1));
     string title = sm.str(2);
     return make_pair(id, title);
 }
 
-void removeFromList(const string &fs_root, const string &path, size_t id)
+void removeFromList(const string &fs_root, const string &path, int id)
 {
     //remove item with id from list
     ifstream in_list;      //read from list file
@@ -91,7 +87,7 @@ void removeFromList(const string &fs_root, const string &path, size_t id)
     in_list.open(path, fstream::in);
     out_list_tmp.open(tmp_list_path, fstream::out);
     string line;
-    pair<size_t, string> pair;
+    pair<int, string> pair;
     if (in_list.is_open() && out_list_tmp.is_open())
     {
         while (getline(in_list, line))
@@ -109,10 +105,10 @@ void removeFromList(const string &fs_root, const string &path, size_t id)
     }
 }
 
-size_t titleInList(ifstream &in_list, const string &title, const DBException &e)
+int titleInList(ifstream &in_list, const string &title, const DBException &e)
 {
     string line;
-    pair<size_t, string> pair;
+    pair<int, string> pair;
     while (getline(in_list, line))
     {
         pair = ::readPair(line);
@@ -126,7 +122,7 @@ size_t titleInList(ifstream &in_list, const string &title, const DBException &e)
     return pair.first;
 }
 
-void appendToList(const string &path, size_t id, const string &title)
+void appendToList(const string &path, int id, const string &title)
 {
     //append to list file
     ofstream out_list;
@@ -139,7 +135,7 @@ template <typename T>
 void readList(std::ifstream &in_list, vector<T> &list)
 {
     string line;
-    pair<size_t, string> pair;
+    pair<int, string> pair;
     while (getline(in_list, line))
     {
         pair = readPair(line);
@@ -148,15 +144,26 @@ void readList(std::ifstream &in_list, vector<T> &list)
     in_list.close();
 }
 
-void DBDisk::writeArticle(size_t group, const Article &article)
+int nextId(std::ifstream &in_list)
 {
-    //check in the group file for title
+    string line;
+    pair<int, string> pair;
+    while (getline(in_list, line))
+    {
+        pair = readPair(line);
+    }
+    in_list.close();
+    return pair.first + 1;
+}
+
+void DBDisk::writeArticle(int group, const Article &article)
+{
+    //check if group exists
     string group_path = fs_root + "g" + to_string(group) + ".txt";
     ifstream in_group = checkFile(group_path, DBException{DBExceptionType::GROUP_NOT_FOUND, ""}, false);
-    size_t id = titleInList(in_group, article.title, DBException{DBExceptionType::ARTICLE_ALREADY_EXISTS, ""});
 
     //adding article to group
-    size_t next_id = id + 1;
+    int next_id = nextId(in_group);
     appendToList(group_path, next_id, article.title);
 
     //writing the article to file
@@ -165,7 +172,7 @@ void DBDisk::writeArticle(size_t group, const Article &article)
     ::writeArticle(article_path, article);
 }
 
-const Article DBDisk::readArticle(size_t group, size_t article)
+const Article DBDisk::readArticle(int group, int article)
 {
     //check if group exists
     string group_path = fs_root + "g" + to_string(group) + ".txt";
@@ -196,10 +203,10 @@ void DBDisk::writeGroup(const string &title)
     ifstream in_groups;
     string groups_path = fs_root + "newsgroup.txt";
     in_groups.open(groups_path, fstream::in);
-    size_t id = titleInList(in_groups, title, DBException{DBExceptionType::GROUP_ALREADY_EXISTS, ""});
+    int id = titleInList(in_groups, title, DBException{DBExceptionType::GROUP_ALREADY_EXISTS, ""});
 
     //write to news groups
-    size_t next_id = id + 1;
+    int next_id = id + 1;
     appendToList(groups_path, next_id, title);
 
     //create the group file
@@ -208,7 +215,7 @@ void DBDisk::writeGroup(const string &title)
     out_group.close();
 }
 
-const std::shared_ptr<vector<Article>> DBDisk::readArticles(size_t group)
+const std::shared_ptr<vector<Article>> DBDisk::readArticles(int group)
 {
     //read group
     vector<Article> articles;
@@ -218,7 +225,7 @@ const std::shared_ptr<vector<Article>> DBDisk::readArticles(size_t group)
     return std::make_shared<vector<Article>>(articles);
 }
 
-void DBDisk::deleteArticle(size_t group, size_t article)
+void DBDisk::deleteArticle(int group, int article)
 {
     //check if group exists
     string group_path = fs_root + "g" + to_string(group) + ".txt";
@@ -235,7 +242,7 @@ void DBDisk::deleteArticle(size_t group, size_t article)
     removeFromList(fs_root, group_path, article);
 }
 
-void DBDisk::deleteGroup(size_t group)
+void DBDisk::deleteGroup(int group)
 {
     //check if group exists
     string group_path = fs_root + "g" + to_string(group) + ".txt";

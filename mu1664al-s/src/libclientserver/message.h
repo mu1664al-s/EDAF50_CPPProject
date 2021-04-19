@@ -10,7 +10,7 @@ using std::vector;
 struct Parameter
 {
     const Protocol type;
-    const size_t N;
+    const int N;
     const string str;
 };
 
@@ -29,9 +29,8 @@ class Message
 {
 public:
     Message() = default;
-    Message(const string &package); // parse and validate message package
     const string encode() const;
-    Message &addNumParam(size_t num);
+    Message &addNumParam(int num);
     Message &addStrParam(const string &str);
     Message &setCommand(const Protocol &command)
     {
@@ -64,8 +63,5 @@ private:
     Protocol error = Protocol::UNDEFINED;
     Protocol end = Protocol::UNDEFINED;
     vector<Parameter> parameters{};
-
-    int decNum(const string &str) const;
-    const string encNum(size_t num) const;
     string encodeParams() const;
 };

@@ -29,88 +29,83 @@ using std::stoi;
 class ServerBase
 {
 public:
+    void run(Server &server, shared_ptr<DBInterface> db)
+    {
+        while (true)
+        {
+            shared_ptr<Connection> conn = server.waitForActivity();
+            if (conn != nullptr)
+            {
+                try
+                {
+                    exec(conn, db);
+                }
+                catch (ConnectionClosedException &)
+                {
+                    server.deregisterConnection(conn);
+                    cout << "Client closed connection" << endl;
+                }
+                catch (MessageException &)
+                {
+                    server.deregisterConnection(conn);
+                    cout << "Client disconnected for illegal message" << endl;
+                }
+            }
+            else
+            {
+                conn = make_shared<Connection>();
+                server.registerConnection(conn);
+                cout << "New client connects" << endl;
+            }
+        }
+    };
     void exec(shared_ptr<Connection> conn,
               shared_ptr<DBInterface> db)
     {
-        try
+        Message ms = Message();
+        const Message &message = MessageHandler::recieve(conn);
+        switch (message.getCommand())
         {
-            Message ms = Message();
-            const Message &message = MessageHandler::recieve(conn);
-            switch (message.getCommand())
-            {
-            case Protocol::COM_LIST_NG:
-            {
-                listGroups(db, ms);
-                break;
-            }
-            case Protocol::COM_LIST_ART:
-            {
-                listArticles(db, message, ms);
-                break;
-            }
-            case Protocol::COM_CREATE_NG:
-            {
-                createGroup(db, message, ms);
-                break;
-            }
-            case Protocol::COM_CREATE_ART:
-            {
-                createArticle(db, message, ms);
-                break;
-            }
-            case Protocol::COM_DELETE_NG:
-            {
-                deleteGroup(db, message, ms);
-                break;
-            }
-            case Protocol::COM_DELETE_ART:
-            {
-                deleteArticle(db, message, ms);
-                break;
-            }
-            case Protocol::COM_GET_ART:
-            {
-                getArticle(db, message, ms);
-                break;
-            }
-            default:
-                break;
-            }
-            MessageHandler::send(conn, ms);
-        }
-        catch (MessageException &)
+        case Protocol::COM_LIST_NG:
         {
-            cout << "ILLEGAL MESSAGE" << endl;
+            listGroups(db, ms);
+            break;
         }
+        case Protocol::COM_LIST_ART:
+        {
+            listArticles(db, message, ms);
+            break;
+        }
+        case Protocol::COM_CREATE_NG:
+        {
+            createGroup(db, message, ms);
+            break;
+        }
+        case Protocol::COM_CREATE_ART:
+        {
+            createArticle(db, message, ms);
+            break;
+        }
+        case Protocol::COM_DELETE_NG:
+        {
+            deleteGroup(db, message, ms);
+            break;
+        }
+        case Protocol::COM_DELETE_ART:
+        {
+            deleteArticle(db, message, ms);
+            break;
+        }
+        case Protocol::COM_GET_ART:
+        {
+            getArticle(db, message, ms);
+            break;
+        }
+        default:
+            break;
+        }
+        MessageHandler::send(conn, ms);
     };
-
-    Server init(int argc, char *argv[])
-    {
-        if (argc != 2)
-        {
-            cerr << "Usage: server port-number" << endl;
-            exit(1);
-        }
-
-        int port = -1;
-        try
-        {
-            port = stoi(argv[1]);
-        }
-        catch (exception &e)
-        {
-            cerr << "Wrong format for port number. " << e.what() << endl;
-            exit(2);
-        }
-
-        Server server(port);
-        if (!server.isReady())
-        {
-            cerr << "Server initialization error." << endl;
-            exit(3);
-        }
-        return server;
-    }
 
 private:
     void listGroups(shared_ptr<DBInterface> database, Message &ms)
@@ -137,7 +132,6 @@ private:
         }
         catch (DBException &)
         {
-            cout << "DBException" << endl;
             ms.setCommand(Protocol::ANS_LIST_ART).setStatus(Protocol::ANS_NAK).setError(Protocol::ERR_NG_DOES_NOT_EXIST);
         }
     }
@@ -152,7 +146,6 @@ private:
         }
         catch (DBException &)
         {
-            cout << "DBException" << endl;
             ms.setCommand(Protocol::ANS_CREATE_NG).setStatus(Protocol::ANS_NAK).setError(Protocol::ERR_NG_ALREADY_EXISTS);
         }
     }
@@ -171,7 +164,6 @@ private:
         }
         catch (DBException &)
         {
-            cout << "DBException" << endl;
             ms.setCommand(Protocol::ANS_CREATE_ART).setStatus(Protocol::ANS_NAK).setError(Protocol::ERR_NG_DOES_NOT_EXIST);
         }
     }
@@ -186,7 +178,6 @@ private:
         }
         catch (DBException &)
         {
-            cout << "DBException" << endl;
             ms.setCommand(Protocol::ANS_DELETE_NG).setStatus(Protocol::ANS_NAK).setError(Protocol::ERR_NG_DOES_NOT_EXIST);
         }
     }
@@ -203,7 +194,6 @@ private:
         }
         catch (DBException &e)
         {
-            cout << "DBException" << endl;
             Protocol error;
             if (e.type == DBExceptionType::ARTICLE_NOT_FOUND)
             {
@@ -229,7 +219,6 @@ private:
         }
         catch (DBException &e)
         {
-            cout << "DBException" << endl;
             Protocol error;
             if (e.type == DBExceptionType::ARTICLE_NOT_FOUND)
             {
