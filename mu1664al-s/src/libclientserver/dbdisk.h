@@ -18,23 +18,18 @@ public:
 
     virtual const Article readArticle(int group, int article);
 
-    virtual const vector<Group> &readGroups();
+    virtual const std::shared_ptr<vector<Group>> readGroups();
 
-    virtual void writeGroup(const string &name);
+    virtual void writeGroup(const string &title);
 
-    virtual const vector<Article> readArticles(int group);
+    virtual const std::shared_ptr<vector<Article>> readArticles(int group);
 
     virtual void deleteArticle(int group, int article);
 
     virtual void deleteGroup(int group);
-    void getids();
-    void getnames();
 
 private:
     string fs_root;
-    vector<Group> groups;
-    vector<Group>::iterator checkRegister(int group);
-    pair<int, string> readPair(const string &line, bool escape = false) const;
 };
 
 #endif

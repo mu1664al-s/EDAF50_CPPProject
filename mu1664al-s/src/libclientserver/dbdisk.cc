@@ -12,245 +12,259 @@ using namespace std;
 DBDisk::DBDisk(const string &fs_root)
 {
     this->fs_root = fs_root;
-    ifstream in_register;
-    pair<int, string> pair;
-    string line;
-    in_register.open(fs_root + "newsgroup.txt", fstream::out | fstream::in);
-    while (getline(in_register, line))
-    {
-        pair = readPair(line, true);
-        groups.push_back(Group{pair.first, pair.second, vector<Article>{}});
-    }
-    in_register.close();
 }
 DBDisk::~DBDisk()
 {
 }
 
-void DBDisk::writeArticle(int group, const Article &article)
+ifstream checkFile(const string &path, const DBException &e, bool closeAfter = true)
 {
-    //check register
-    checkRegister(group);
+    ifstream in_file;
+    in_file.open(path, fstream::in);
+    if (!in_file.is_open())
+    {
+        throw e;
+    }
+    if (closeAfter)
+    {
+        in_file.close();
+    }
+    return in_file;
+}
 
-    ifstream in_group;
-    in_group.open(fs_root + "g" + to_string(group) + ".txt", fstream::in);
+inline void writeArticle(const string &path, const Article &article)
+{
+    ofstream out_article;
+    out_article.open(path, fstream::out);
+    out_article << article.title << endl;
+    out_article << article.author << endl;
+    istringstream ss(article.text);
+    string text_line;
+    getline(ss, text_line);
+    out_article << text_line;
+    while (getline(ss, text_line))
+    {
+        out_article << "\n"
+                    << text_line;
+    }
+    out_article.close();
+}
+
+inline void readArticle(const string &path, Article &article)
+{
+    ifstream in_article = checkFile(path, DBException{DBExceptionType::ARTICLE_NOT_FOUND, ""}, false);
+    getline(in_article, article.title);
+    getline(in_article, article.author);
+    string text_line = "";
+    getline(in_article, article.text);
+    while (getline(in_article, text_line))
+    {
+        article.text += "\n" + text_line;
+    }
+    if (!(text_line == ""))
+    {
+        article.text += "\n";
+    }
+    in_article.close();
+}
+
+pair<int, string> readPair(const string &line)
+{
+    std::smatch sm;
+    std::regex e("^([0-9]*)<>(.*)$");
+    std::regex_match(line, sm, e);
+    int id = std::stoi(sm.str(1));
+    string title = sm.str(2);
+    return make_pair(id, title);
+}
+
+void removeFromList(const string &fs_root, const string &path, int id)
+{
+    //remove item with id from list
+    ifstream in_list;      //read from list file
+    ofstream out_list_tmp; //write to a tmp list file
+    string tmp_list_path = fs_root + "list_" + to_string(id) + "_tmp.txt";
+    in_list.open(path, fstream::in);
+    out_list_tmp.open(tmp_list_path, fstream::out);
     string line;
     pair<int, string> pair;
-    while (getline(in_group, line))
+    if (in_list.is_open() && out_list_tmp.is_open())
     {
-        pair = readPair(line, true);
-        if (pair.second == article.title)
+        while (getline(in_list, line))
         {
-            throw DBException{DBExceptionType::ARTICLE_ALREADY_EXISTS, ""};
+            pair = ::readPair(line);
+            if (pair.first != id)
+            {
+                out_list_tmp << line << endl;
+            }
+        }
+        in_list.close();
+        out_list_tmp.close();
+        remove(path.c_str());
+        rename(tmp_list_path.c_str(), path.c_str());
+    }
+}
+
+int titleInList(ifstream &in_list, const string &title, const DBException &e)
+{
+    string line;
+    pair<int, string> pair;
+    while (getline(in_list, line))
+    {
+        pair = ::readPair(line);
+        if (pair.second == title)
+        {
+            in_list.close();
+            throw e;
         }
     }
-    in_group.close();
+    in_list.close();
+    return pair.first;
+}
 
-    // defined output
-    int next_id = pair.first + 1;
-    string title = regex_replace(article.title, regex(" "), "\\\\s");
-    string author = regex_replace(article.author, regex(" "), "\\\\s");
-    string text = regex_replace(article.text, regex(" "), "\\\\s");
-    text = regex_replace(text, regex("\n+"), "\\n");
+void appendToList(const string &path, int id, const string &title)
+{
+    //append to list file
+    ofstream out_list;
+    out_list.open(path, fstream::app);
+    out_list << id << "<>" << title << endl;
+    out_list.close();
+}
+
+template <typename T>
+void readList(std::ifstream &in_list, vector<T> &list)
+{
+    string line;
+    pair<int, string> pair;
+    while (getline(in_list, line))
+    {
+        pair = readPair(line);
+        list.push_back(T{pair.first, pair.second});
+    }
+    in_list.close();
+}
+
+int nextId(std::ifstream &in_list)
+{
+    string line;
+    pair<int, string> pair;
+    while (getline(in_list, line))
+    {
+        pair = readPair(line);
+    }
+    in_list.close();
+    return pair.first + 1;
+}
+
+void DBDisk::writeArticle(int group, const Article &article)
+{
+    //check if group exists
+    string group_path = fs_root + "g" + to_string(group) + ".txt";
+    ifstream in_group = checkFile(group_path, DBException{DBExceptionType::GROUP_NOT_FOUND, ""}, false);
 
     //adding article to group
-    ofstream out_group;
-    out_group.open(fs_root + "g" + to_string(group) + ".txt", fstream::app | fstream::out);
-    out_group << next_id << "<>" << title << endl;
-    ofstream out_article;
-    out_group.close();
+    int next_id = nextId(in_group);
+    appendToList(group_path, next_id, article.title);
 
     //writing the article to file
-    out_article.open(fs_root + "g" + to_string(group) + "a" + to_string(next_id) + ".txt", fstream::out);
-    out_article << author << endl
-                << text << endl;
-    out_article.close();
+    string article_path = fs_root + "g" + to_string(group) + "a" + to_string(next_id) + ".txt";
+    //look in outer namespace
+    ::writeArticle(article_path, article);
 }
 
 const Article DBDisk::readArticle(int group, int article)
 {
-    //check register
-    checkRegister(group);
-
-    // check the group
-    ifstream in_group;
-    in_group.open(fs_root + "g" + to_string(group) + ".txt", fstream::in);
-    string line;
-    pair<int, string> pair;
-    bool article_found = false;
-    while (getline(in_group, line))
-    {
-        pair = readPair(line);
-        if (pair.first == article)
-        {
-            article_found = true;
-            break;
-        }
-    }
-    in_group.close();
-
-    //check if article found in group
-    if (!article_found)
-    {
-        throw DBException{DBExceptionType::ARTICLE_NOT_FOUND, ""};
-    }
+    //check if group exists
+    string group_path = fs_root + "g" + to_string(group) + ".txt";
+    checkFile(group_path, DBException{DBExceptionType::GROUP_NOT_FOUND, ""});
 
     //read article
-    ifstream in_article;
-    in_article.open(fs_root + "g" + to_string(group) + "a" + to_string(article) + ".txt", fstream::in);
-    string author, text;
-    getline(in_article, author);
-    getline(in_article, text);
+    string article_path = fs_root + "g" + to_string(group) + "a" + to_string(article) + ".txt";
+    Article _article = Article{};
+    //look in outer namespace
+    ::readArticle(article_path, _article);
 
-    //create article structure
-    string title = regex_replace(pair.second, regex("\\\\\\\\s"), " ");
-    author = regex_replace(author, regex("\\\\\\\\s"), " ");
-    text = regex_replace(text, regex("\\\\n"), "\n");
-    text = regex_replace(text, regex("\\\\\\\\s"), " ");
-    in_article.close();
-
-    return Article{pair.first, title, author, text};
+    return _article;
 }
 
-const vector<Group> &DBDisk::readGroups()
+const std::shared_ptr<vector<Group>> DBDisk::readGroups()
 {
-    return groups;
+    //read groups file
+    vector<Group> groups;
+    ifstream in_register;
+    in_register.open(fs_root + "newsgroup.txt", fstream::in);
+    readList(in_register, groups);
+    return std::make_shared<vector<Group>>(groups);
 }
 
-void DBDisk::writeGroup(const string &name)
+void DBDisk::writeGroup(const string &title)
 {
-    //check the register after group name
-    auto it = find_if(groups.begin(), groups.end(), [&name](const Group &group) { return group.title == name; });
-    if (it != groups.end())
-    {
-        throw DBException{DBExceptionType::GROUP_ALREADY_EXISTS, ""};
-    }
+    //check news groups
+    ifstream in_groups;
+    string groups_path = fs_root + "newsgroup.txt";
+    in_groups.open(groups_path, fstream::in);
+    int id = titleInList(in_groups, title, DBException{DBExceptionType::GROUP_ALREADY_EXISTS, ""});
 
     //write to news groups
-    string title = regex_replace(name, regex(" "), "\\\\s");
-    ofstream out_register; // newsgorup.txt
-    ofstream out_group;    //[gid.txt]
-    out_register.open(fs_root + "newsgroup.txt", fstream::app);
-    int id = 1;
-    if (groups.size() > 0)
-    {
-        id = groups.back().id + 1;
-    }
-    out_register << id << "<>" << title << endl;
-    out_register.close();
-
-    //add to register
-    groups.push_back(Group{id, name, vector<Article>{}});
+    int next_id = id + 1;
+    appendToList(groups_path, next_id, title);
 
     //create the group file
-    out_group.open(fs_root + "g" + to_string(id) + ".txt", fstream::out);
+    ofstream out_group; //[gid.txt]
+    out_group.open(fs_root + "g" + to_string(next_id) + ".txt", fstream::out);
     out_group.close();
 }
 
-const vector<Article> DBDisk::readArticles(int group)
+const std::shared_ptr<vector<Article>> DBDisk::readArticles(int group)
 {
-    //check register
-    checkRegister(group);
-
     //read group
     vector<Article> articles;
-    ifstream in_group;
-    in_group.open(fs_root + "g" + to_string(group) + ".txt", fstream::in);
-    string line;
-    pair<int, string> pair;
-    while (getline(in_group, line))
-    {
-        pair = readPair(line, true);
-        articles.push_back(Article{pair.first, pair.second, "", ""});
-    }
-    in_group.close();
-    return articles;
+    string group_path = fs_root + "g" + to_string(group) + ".txt";
+    ifstream in_group = checkFile(group_path, DBException{DBExceptionType::GROUP_NOT_FOUND, ""}, false);
+    readList(in_group, articles);
+    return std::make_shared<vector<Article>>(articles);
 }
 
 void DBDisk::deleteArticle(int group, int article)
 {
-    //check register
-    checkRegister(group);
-
-    //find article in group
-    vector<Article> articles = readArticles(group);
-    auto article_it = find_if(articles.begin(), articles.end(), [&article](const Article &a) { return a.id == article; });
-    if (article_it == articles.end())
-    {
-        throw DBException{DBExceptionType::ARTICLE_NOT_FOUND, ""};
-    }
-
-    //delete article in group
-    articles.erase(article_it);
-    ofstream out_group; //create a tmp.txt, later rename to gid.txt
+    //check if group exists
     string group_path = fs_root + "g" + to_string(group) + ".txt";
-    out_group.open(group_path, fstream::trunc);
-    string title;
-    for (Article a : articles)
-    {
-        title = regex_replace(a.title, regex(" "), "\\\\s");
-        out_group << a.id << "<>" << title << endl;
-    }
-    out_group.close();
+    checkFile(group_path, DBException{DBExceptionType::GROUP_NOT_FOUND, ""});
+
+    //check if article file exists
+    string article_path = fs_root + "g" + to_string(group) + "a" + to_string(article) + ".txt";
+    checkFile(article_path, DBException{DBExceptionType::ARTICLE_NOT_FOUND, ""});
 
     //delete article
-    string article_path = fs_root + "g" + to_string(group) + "a" + to_string(article) + ".txt";
     remove(article_path.c_str()); //remove the article document.
+
+    //remove article from group
+    removeFromList(fs_root, group_path, article);
 }
 
 void DBDisk::deleteGroup(int group)
 {
-    //check register
-    auto it = checkRegister(group);
-
-    //read group
-    vector<Article> articles = readArticles(group);
-
-    //delete group file
+    //check if group exists
     string group_path = fs_root + "g" + to_string(group) + ".txt";
-    remove(group_path.c_str());
+    ifstream in_group = checkFile(group_path, DBException{DBExceptionType::GROUP_NOT_FOUND, ""}, false);
 
-    //delete articles
-    for (Article article : articles)
+    //remove articles that belong to the group
+    pair<int, string> pair;
+    string line;
+    string article_path;
+    while (getline(in_group, line))
     {
-        string article_path = fs_root + "g" + to_string(group) + "a" + to_string(article.id) + ".txt";
+        pair = readPair(line);
+        //delete article
+        article_path = fs_root + "g" + to_string(group) + "a" + to_string(pair.first) + ".txt";
         remove(article_path.c_str()); //remove the article document.
     }
+    in_group.close();
 
-    //delete group from register
-    groups.erase(it);
-    ofstream out_groups;
+    //remove the group file
+    remove(group_path.c_str());
+
+    //remove group from news groups
     string groups_path = fs_root + "newsgroup.txt";
-    out_groups.open(groups_path, fstream::trunc);
-    string title;
-    for (Group g : groups)
-    {
-        title = regex_replace(g.title, regex(" "), "\\\\s");
-        out_groups << g.id << "<>" << title << endl;
-    }
-    out_groups.close();
-}
-
-vector<Group>::iterator DBDisk::checkRegister(int group)
-{
-    auto it = find_if(groups.begin(), groups.end(), [&group](const Group &g) { return g.id == group; });
-    if (it == groups.end())
-    {
-        throw DBException{DBExceptionType::GROUP_NOT_FOUND, ""};
-    }
-    return it;
-}
-
-pair<int, string> DBDisk::readPair(const string &line, bool escape) const
-{
-    int id;
-    string title;
-    char delim;
-    istringstream ss(line);
-    ss >> id >> delim >> delim >> title;
-    if (escape)
-    {
-        title = regex_replace(title, regex("\\\\\\\\s"), " ");
-    }
-    return make_pair(id, title);
+    removeFromList(fs_root, groups_path, group);
 }

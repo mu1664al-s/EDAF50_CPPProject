@@ -10,11 +10,11 @@ public:
 
     virtual const Article readArticle(int group, int article); // done
 
-    virtual const vector<Group> &readGroups(); // done
+    virtual const std::shared_ptr<vector<Group>> readGroups(); // done
 
     virtual void writeGroup(const string &name); // done
 
-    virtual const vector<Article> readArticles(int group); // done
+    virtual const std::shared_ptr<vector<Article>> readArticles(int group); // done
 
     virtual void deleteArticle(int group, int article); // done
 
@@ -22,6 +22,8 @@ public:
 
 private:
     vector<Group> groups;
+    vector<Group>::iterator checkGroups(int group);
+    vector<Article>::iterator checkArticles(vector<Group>::iterator &it, int article);
 };
 
 #endif

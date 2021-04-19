@@ -29,7 +29,6 @@ class Message
 {
 public:
     Message() = default;
-    Message(const string &package); // parse and validate message package
     const string encode() const;
     Message &addNumParam(int num);
     Message &addStrParam(const string &str);
@@ -64,8 +63,5 @@ private:
     Protocol error = Protocol::UNDEFINED;
     Protocol end = Protocol::UNDEFINED;
     vector<Parameter> parameters{};
-
-    int decNum(const string &str) const;
-    const string encNum(int num) const;
     string encodeParams() const;
 };

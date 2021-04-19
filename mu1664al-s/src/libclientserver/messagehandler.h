@@ -20,8 +20,6 @@ public:
     static void send(shared_ptr<Connection> conn, const Message &message);
 
 private:
-    static const string readPackage(shared_ptr<Connection> conn);
-    static void writeString(shared_ptr<Connection> conn, const string &str);
 };
 
 #endif
