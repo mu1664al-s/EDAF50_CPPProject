@@ -4,7 +4,7 @@ A simple single threaded news server that communicates with the client using a s
 
 ## About
 
-The server can handle multiple connections. There are two types of servers. Executable "serverinmemory" is an in memory server while "serverdisk" on the other hand uses a filesystem. The interactions with the two different types of databases are defined in the "dbinterface.h" interface. The databases themselves are implemented in "dbdisk.cc" and "dbinmemory.cc". The message handler is denined in "messagehandler.h". This class takes in a shared pointer to a connection and handles all communication using a very high abstraction level. It can "recieve" incomming packages, "send" back messages. The message itself is defined in "message.h", in accordance to the protocol.
+The server can handle multiple connections. There are two types of servers. Executable "serverinmemory" is an in memory server while "serverdisk" on the other hand uses a filesystem. The interactions with the two different types of databases are defined in the "dbinterface.h" interface. The message handler is defined in "messagehandler.h". This class pipes trough a connection instance to receive, validate, parse and send protocol defined messages.
 
 ### UML
 
@@ -12,19 +12,31 @@ The server can handle multiple connections. There are two types of servers. Exec
 
 ## Installation
 
-Run the following commands from here or inside the src directory. The executables will be generated in the "build" directory, inside their own subdirectories and then copied over to the "bin" directory.
+Run the following commands from here. The executables will be generated copies to the "bin" directory. A /database directory will also be generated. It can be used as the filesystem root for the serverdisk, but any other empty directory can also be used.
 
 ```bash
-make
+make all
 make install
 ```
 
 ## Usage
 
-Will be updated.
+### Starting the Server
 
 ```bash
+./serverinmemory "port number"
+```
 
+or
+
+```bash
+./serverdisk "filesystem root path" "port number"
+```
+
+### Starting the Client
+
+```bash
+./client localhost "port number"
 ```
 
 ## Project Structure
@@ -62,8 +74,7 @@ Will be updated.
 │   │   └── server.h
 │   ├── test
 │   │   ├── Makefile
-│   │   ├── myclient.cc
-│   │   └── myserver.cc
+│   │   └── illegalTest.cc
 │   └── Makefile
 ├── Makefile
 ├── README.md
